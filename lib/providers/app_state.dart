@@ -41,6 +41,10 @@ class AppState extends ChangeNotifier {
   // Loading state
   bool _isLoading = false;
 
+  // Animation callbacks
+  void Function(int xpAmount)? onXpGained;
+  void Function(int newLevel)? onLevelUp;
+
   // Getters
   RamadhanSession? get activeSession => _activeSession;
   UserStats? get currentStats => _currentStats;
@@ -203,6 +207,9 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Store old level for level-up detection
+      final oldLevel = _currentStats?.level ?? 1;
+
       // Calculate XP for the record
       final xpEarned = _xpCalculatorService.calculateTotalDailyXp(record);
 
@@ -239,6 +246,17 @@ class AppState extends ChangeNotifier {
       // Reload stats
       _currentStats =
           await _statsRepository.getStatsForSession(_activeSession!.id!);
+
+      // Trigger XP gain animation if XP was earned
+      if (xpEarned > 0) {
+        onXpGained?.call(xpEarned);
+      }
+
+      // Check for level up and trigger animation
+      final newLevel = _currentStats?.level ?? 1;
+      if (newLevel > oldLevel) {
+        onLevelUp?.call(newLevel);
+      }
 
       // Check and unlock achievements
       final allRecords = await _dailyRecordRepository

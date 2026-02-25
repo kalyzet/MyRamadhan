@@ -2,14 +2,99 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../models/daily_record.dart';
+import '../widgets/create_session_dialog.dart';
+import '../widgets/xp_gain_animation.dart';
 
 /// Home screen displaying daily checklist and progress
 /// Requirements: 10.3, 11.1
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
+  OverlayEntry? _xpOverlay;
+  OverlayEntry? _levelUpOverlay;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Set up animation callbacks after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appState = Provider.of<AppState>(context, listen: false);
+      
+      appState.onXpGained = (xpAmount) {
+        _showXpGainAnimation(xpAmount);
+      };
+      
+      appState.onLevelUp = (newLevel) {
+        _showLevelUpAnimation(newLevel);
+      };
+    });
+  }
+
+  @override
+  void dispose() {
+    _xpOverlay?.remove();
+    _levelUpOverlay?.remove();
+    super.dispose();
+  }
+
+  void _showXpGainAnimation(int xpAmount) {
+    _xpOverlay?.remove();
+    
+    _xpOverlay = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height * 0.3,
+        left: MediaQuery.of(context).size.width * 0.5 - 60,
+        child: XpGainAnimation(
+          xpAmount: xpAmount,
+          onComplete: () {
+            _xpOverlay?.remove();
+            _xpOverlay = null;
+          },
+        ),
+      ),
+    );
+    
+    Overlay.of(context).insert(_xpOverlay!);
+  }
+
+  void _showLevelUpAnimation(int newLevel) {
+    _levelUpOverlay?.remove();
+    
+    _levelUpOverlay = OverlayEntry(
+      builder: (context) => Center(
+        child: LevelUpAnimation(
+          newLevel: newLevel,
+          onComplete: () {
+            _levelUpOverlay?.remove();
+            _levelUpOverlay = null;
+          },
+        ),
+      ),
+    );
+    
+    Overlay.of(context).insert(_levelUpOverlay!);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return Overlay(
+      key: _overlayKey,
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => _buildContent(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
         if (appState.isLoading) {
@@ -21,11 +106,61 @@ class HomeScreen extends StatelessWidget {
         }
 
         if (appState.activeSession == null) {
-          return const Center(
-            child: Text(
-              'No active session. Please create a new Ramadhan session.',
-              style: TextStyle(color: Colors.white70),
-              textAlign: TextAlign.center,
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.calendar_month,
+                    size: 80,
+                    color: Color(0xFF10B981),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'No Active Session',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Create a new Ramadhan session to start tracking your spiritual journey.',
+                    style: TextStyle(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final result = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => const CreateSessionDialog(),
+                      );
+                      
+                      // If session was created successfully, reload
+                      if (result == true && context.mounted) {
+                        // AppState will automatically reload after creation
+                      }
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Create New Session'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF10B981),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -69,6 +204,7 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
+}
 
   Widget _buildDayIndicator(int currentDay, int totalDays) {
     return Container(
@@ -768,63 +904,106 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ...sideQuests.map((quest) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(
-                      quest.completed
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color: quest.completed
-                          ? const Color(0xFF10B981)
-                          : Colors.white38,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            quest.title,
-                            style: TextStyle(
-                              color: quest.completed
-                                  ? Colors.white54
-                                  : Colors.white,
-                              fontSize: 14,
-                              decoration: quest.completed
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                            ),
-                          ),
-                          if (quest.description.isNotEmpty)
-                            Text(
-                              quest.description,
-                              style: const TextStyle(
-                                color: Colors.white38,
-                                fontSize: 12,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      '+${quest.xpReward} XP',
-                      style: const TextStyle(
-                        color: Color(0xFFD97706),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+          ...sideQuests.map((quest) => _buildSideQuestTile(quest)),
         ],
       ),
     );
   }
-}
+
+  Widget _buildSideQuestTile(quest) {
+    return Consumer<AppState>(
+      builder: (context, appState, child) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: InkWell(
+            onTap: quest.completed
+                ? null
+                : () async {
+                    // Complete the side quest
+                    try {
+                      await appState.completeSideQuest(quest.id);
+                      
+                      // Show success message
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${quest.title} completed! +${quest.xpReward} XP',
+                            ),
+                            backgroundColor: const Color(0xFF10B981),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error completing quest: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    quest.completed
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: quest.completed
+                        ? const Color(0xFF10B981)
+                        : Colors.white38,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          quest.title,
+                          style: TextStyle(
+                            color: quest.completed
+                                ? Colors.white54
+                                : Colors.white,
+                            fontSize: 14,
+                            decoration: quest.completed
+                                ? TextDecoration.lineThrough
+                                : null,
+                          ),
+                        ),
+                        if (quest.description.isNotEmpty)
+                          Text(
+                            quest.description,
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '+${quest.xpReward} XP',
+                    style: const TextStyle(
+                      color: Color(0xFFD97706),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
 /// Animated checkbox tile with smooth transitions
 /// Requirements: 11.2 (60 FPS animations)

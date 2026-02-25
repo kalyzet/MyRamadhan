@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../models/ramadhan_session.dart';
 import '../repositories/session_repository.dart';
+import '../widgets/create_session_dialog.dart';
 import 'ramadhan_history_screen.dart';
 
 /// Profile screen displaying user session information and team credits
@@ -21,6 +22,37 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Create New Session Button
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => const CreateSessionDialog(),
+                  );
+                  
+                  // Session will automatically reload after creation
+                  if (result == true && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Session created! Previous session deactivated.'),
+                        backgroundColor: Color(0xFF10B981),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.add_circle_outline),
+                label: const Text('Create New Session'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Active Session Information
               if (activeSession != null)
                 _buildSessionInfoCard(activeSession)
