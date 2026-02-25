@@ -56,6 +56,7 @@ dev_dependencies:
     # Property-based testing
     test: ^1.24.0
     faker: ^2.1.0
+    glados: ^1.1.7
 
     # SQLite testing support
     sqflite_common_ffi: ^2.3.0
