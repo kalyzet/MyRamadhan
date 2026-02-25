@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'providers/app_state.dart';
 import 'screens/home_screen.dart';
 import 'screens/stats_screen.dart';
+import 'screens/achievements_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,9 +55,9 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const PlaceholderScreen(title: 'Stats'),
-    const PlaceholderScreen(title: 'Achievements'),
-    const PlaceholderScreen(title: 'Profile'),
+    const StatsScreen(),
+    const AchievementsScreen(),
+    const ProfileScreen(),
   ];
 
   @override
