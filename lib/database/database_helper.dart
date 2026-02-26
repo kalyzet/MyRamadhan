@@ -196,14 +196,14 @@ class DatabaseHelper {
       await db.execute('''
       CREATE TABLE app_settings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        language_code TEXT NOT NULL DEFAULT 'en',
+        language_code TEXT NOT NULL DEFAULT 'id',
         updated_at TEXT NOT NULL
       )
     ''');
 
       // Initialize default settings
       await db.insert('app_settings', {
-        'language_code': 'en',
+        'language_code': 'id',
         'updated_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
@@ -222,14 +222,14 @@ class DatabaseHelper {
         await db.execute('''
         CREATE TABLE app_settings (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          language_code TEXT NOT NULL DEFAULT 'en',
+          language_code TEXT NOT NULL DEFAULT 'id',
           updated_at TEXT NOT NULL
         )
       ''');
 
         // Initialize default settings
         await db.insert('app_settings', {
-          'language_code': 'en',
+          'language_code': 'id',
           'updated_at': DateTime.now().toIso8601String(),
         });
       }

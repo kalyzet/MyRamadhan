@@ -5,7 +5,7 @@ import '../repositories/settings_repository.dart';
 /// Service for managing application localization
 /// Loads and provides translations for UI text
 class LocalizationService {
-  String _currentLanguage = 'en';
+  String _currentLanguage = 'id';
   Map<String, dynamic> _translations = {};
   final SettingsRepository _settingsRepository;
 
@@ -27,13 +27,34 @@ class LocalizationService {
       _translations = json.decode(jsonString) as Map<String, dynamic>;
       _currentLanguage = languageCode;
     } catch (e) {
-      // If loading fails, fall back to English
-      if (languageCode != 'en') {
-        await loadLanguage('en');
+      // If loading fails, fall back to Indonesian first, then English
+      if (languageCode == 'id') {
+        // If Indonesian fails, try English
+        try {
+          final String jsonString =
+              await rootBundle.loadString('lib/l10n/en.json');
+          _translations = json.decode(jsonString) as Map<String, dynamic>;
+          _currentLanguage = 'en';
+        } catch (e) {
+          // If both fail, use empty translations with Indonesian as default
+          _translations = {};
+          _currentLanguage = 'id';
+        }
+      } else if (languageCode == 'en') {
+        // If English fails, try Indonesian
+        try {
+          final String jsonString =
+              await rootBundle.loadString('lib/l10n/id.json');
+          _translations = json.decode(jsonString) as Map<String, dynamic>;
+          _currentLanguage = 'id';
+        } catch (e) {
+          // If both fail, use empty translations with Indonesian as default
+          _translations = {};
+          _currentLanguage = 'id';
+        }
       } else {
-        // If even English fails, use empty translations
-        _translations = {};
-        _currentLanguage = 'en';
+        // For any other language, fall back to Indonesian
+        await loadLanguage('id');
       }
     }
   }
@@ -85,7 +106,7 @@ class LocalizationService {
   }
 
   /// Initialize localization service with saved language preference
-  /// Loads the language from settings or defaults to English
+  /// Loads the language from settings or defaults to Indonesian
   Future<void> initialize() async {
     try {
       // Get saved settings
@@ -94,8 +115,8 @@ class LocalizationService {
       // Load the saved language
       await loadLanguage(settings.languageCode);
     } catch (e) {
-      // If initialization fails, default to English
-      await loadLanguage('en');
+      // If initialization fails, default to Indonesian
+      await loadLanguage('id');
     }
   }
 }

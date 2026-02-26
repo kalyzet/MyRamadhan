@@ -13,9 +13,9 @@ void main() {
   });
 
   group('LocalizationService', () {
-    test('should initialize with default English language', () async {
-      // **Feature: my-ramadhan-app, Property 39: Default language initialization**
-      // **Validates: Requirements 14.1**
+    test('should initialize with default Indonesian language', () async {
+      // **Feature: indonesian-default-realtime-clock, Property 1: Default language initialization**
+      // **Validates: Requirements 1.2, 1.3**
       
       // Use in-memory database to avoid file locking issues on Windows
       final dbHelper = DatabaseHelper.inMemory();
@@ -29,10 +29,10 @@ void main() {
 
       await localizationService.initialize();
 
-      expect(localizationService.currentLanguage, equals('en'));
+      expect(localizationService.currentLanguage, equals('id'));
 
       final settings = await settingsRepository.getSettings();
-      expect(settings.languageCode, equals('en'));
+      expect(settings.languageCode, equals('id'));
 
       await dbHelper.close();
     });
@@ -49,21 +49,21 @@ void main() {
 
       final settingsRepository = SettingsRepository(dbHelper: dbHelper);
       
-      // First, verify initial state is English
+      // First, verify initial state is Indonesian
       final initialSettings = await settingsRepository.getSettings();
-      expect(initialSettings.languageCode, equals('en'));
+      expect(initialSettings.languageCode, equals('id'));
       
-      // Change language to Indonesian
-      await settingsRepository.updateLanguage('id');
+      // Change language to English
+      await settingsRepository.updateLanguage('en');
 
       // Verify the change was persisted
       final updatedSettings = await settingsRepository.getSettings();
-      expect(updatedSettings.languageCode, equals('id'));
+      expect(updatedSettings.languageCode, equals('en'));
       
       // Create a new repository instance to verify persistence across instances
       final newSettingsRepository = SettingsRepository(dbHelper: dbHelper);
       final persistedSettings = await newSettingsRepository.getSettings();
-      expect(persistedSettings.languageCode, equals('id'));
+      expect(persistedSettings.languageCode, equals('en'));
 
       await dbHelper.close();
     });
