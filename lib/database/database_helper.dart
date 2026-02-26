@@ -6,11 +6,18 @@ import '../exceptions/database_exception.dart' as app_exceptions;
 /// Implements singleton pattern to ensure single database instance
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
-  static Database? _database;
+  Database? _database;
   static const int _maxRetries = 3;
   static const Duration _retryDelay = Duration(milliseconds: 500);
+  
+  final bool _useInMemory;
 
-  DatabaseHelper._init();
+  DatabaseHelper._init({bool useInMemory = false}) : _useInMemory = useInMemory;
+  
+  /// Factory constructor for creating in-memory database instances for testing
+  factory DatabaseHelper.inMemory() {
+    return DatabaseHelper._init(useInMemory: true);
+  }
 
   /// Get database instance, initialize if not exists
   /// Implements retry logic for transient errors
@@ -20,7 +27,7 @@ class DatabaseHelper {
     int retryCount = 0;
     while (retryCount < _maxRetries) {
       try {
-        _database = await _initDB('myramadhan.db');
+        _database = await _initDB(_useInMemory ? ':memory:' : 'myramadhan.db');
         return _database!;
       } catch (e) {
         retryCount++;
@@ -40,13 +47,25 @@ class DatabaseHelper {
   /// Wraps database operations with error handling
   Future<Database> _initDB(String filePath) async {
     try {
+      // For in-memory database, use special path
+      if (filePath == ':memory:') {
+        return await openDatabase(
+          inMemoryDatabasePath,
+          version: 2,
+          onCreate: _createDB,
+          onUpgrade: _upgradeDB,
+        );
+      }
+      
+      // For file-based database
       final dbPath = await getDatabasesPath();
       final path = join(dbPath, filePath);
 
       return await openDatabase(
         path,
-        version: 1,
+        version: 2,
         onCreate: _createDB,
+        onUpgrade: _upgradeDB,
         singleInstance: false, // Allow multiple instances for testing
       );
     } catch (e) {
@@ -172,9 +191,51 @@ class DatabaseHelper {
       CREATE INDEX idx_ramadhan_sessions_is_active 
       ON ramadhan_sessions(is_active)
     ''');
+
+      // Create app_settings table
+      await db.execute('''
+      CREATE TABLE app_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        language_code TEXT NOT NULL DEFAULT 'en',
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+      // Initialize default settings
+      await db.insert('app_settings', {
+        'language_code': 'en',
+        'updated_at': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       throw app_exceptions.DatabaseException.general(
         message: 'Failed to create database schema',
+        originalError: e,
+      );
+    }
+  }
+
+  /// Upgrade database schema for version changes
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    try {
+      if (oldVersion < 2) {
+        // Add app_settings table for version 2
+        await db.execute('''
+        CREATE TABLE app_settings (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          language_code TEXT NOT NULL DEFAULT 'en',
+          updated_at TEXT NOT NULL
+        )
+      ''');
+
+        // Initialize default settings
+        await db.insert('app_settings', {
+          'language_code': 'en',
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+      }
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to upgrade database schema',
         originalError: e,
       );
     }
@@ -184,8 +245,10 @@ class DatabaseHelper {
   /// Wraps close operation with error handling
   Future<void> close() async {
     try {
-      final db = await instance.database;
-      await db.close();
+      if (_database != null) {
+        await _database!.close();
+        _database = null;
+      }
     } catch (e) {
       throw app_exceptions.DatabaseException.general(
         message: 'Failed to close database',
@@ -195,13 +258,19 @@ class DatabaseHelper {
   }
 
   /// Delete database (useful for testing)
-  /// Wraps delete operation with error handling
+  /// For in-memory databases, just closes the connection
+  /// For file-based databases, deletes the file
   Future<void> deleteDB() async {
     try {
       // Close the database first if it's open
       if (_database != null) {
         await _database!.close();
         _database = null;
+      }
+      
+      // For in-memory databases, closing is sufficient
+      if (_useInMemory) {
+        return;
       }
       
       // Add a small delay to ensure the database is fully closed

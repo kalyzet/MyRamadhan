@@ -14,6 +14,7 @@ import '../services/level_calculator_service.dart';
 import '../services/streak_tracker_service.dart';
 import '../services/achievement_tracker_service.dart';
 import '../services/validation_service.dart';
+import '../services/localization_service.dart';
 import '../exceptions/database_exception.dart' as app_exceptions;
 import '../exceptions/validation_exception.dart';
 
@@ -34,6 +35,7 @@ class AppState extends ChangeNotifier {
   final StreakTrackerService _streakTrackerService;
   final AchievementTrackerService _achievementTrackerService;
   final ValidationService _validationService;
+  final LocalizationService _localizationService;
 
   // State
   RamadhanSession? _activeSession;
@@ -41,6 +43,7 @@ class AppState extends ChangeNotifier {
   DailyRecord? _todayRecord;
   List<Achievement> _achievements = [];
   List<SideQuest> _todaySideQuests = [];
+  String _currentLanguage = 'en';
 
   // Cache for active session to avoid repeated database queries
   // Requirements: 9.3 - Query result caching for active session
@@ -63,6 +66,8 @@ class AppState extends ChangeNotifier {
   List<SideQuest> get todaySideQuests => _todaySideQuests;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  String get currentLanguage => _currentLanguage;
+  LocalizationService get localizationService => _localizationService;
 
   AppState({
     SessionRepository? sessionRepository,
@@ -75,6 +80,7 @@ class AppState extends ChangeNotifier {
     StreakTrackerService? streakTrackerService,
     AchievementTrackerService? achievementTrackerService,
     ValidationService? validationService,
+    LocalizationService? localizationService,
   })  : _sessionRepository = sessionRepository ?? SessionRepository(),
         _dailyRecordRepository =
             dailyRecordRepository ?? DailyRecordRepository(),
@@ -93,7 +99,23 @@ class AppState extends ChangeNotifier {
             ),
         _achievementTrackerService =
             achievementTrackerService ?? AchievementTrackerService(),
-        _validationService = validationService ?? ValidationService();
+        _validationService = validationService ?? ValidationService(),
+        _localizationService = localizationService ?? LocalizationService() {
+    // Initialize localization on creation
+    _initializeLocalization();
+  }
+
+  /// Initialize localization service with saved language preference
+  Future<void> _initializeLocalization() async {
+    try {
+      await _localizationService.initialize();
+      _currentLanguage = _localizationService.currentLanguage;
+      notifyListeners();
+    } catch (e) {
+      // If initialization fails, default to English
+      _currentLanguage = 'en';
+    }
+  }
 
   /// Load the active session and its associated data
   /// Requirements: 1.1
@@ -431,5 +453,24 @@ class AppState extends ChangeNotifier {
         record.tilawahPages > 0 &&
         record.dzikirComplete &&
         record.sedekahAmount > 0;
+  }
+
+  /// Change the application language
+  /// Updates the language in localization service and persists the preference
+  /// Requirements: 14.3
+  Future<void> changeLanguage(String languageCode) async {
+    try {
+      // Change language in localization service (this also persists it)
+      await _localizationService.changeLanguage(languageCode);
+
+      // Update current language state
+      _currentLanguage = languageCode;
+
+      // Notify listeners to rebuild UI with new language
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to change language. Please try again.';
+      rethrow;
+    }
   }
 }

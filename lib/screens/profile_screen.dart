@@ -69,6 +69,10 @@ class ProfileScreen extends StatelessWidget {
               _buildHistoryCard(context),
               const SizedBox(height: 16),
 
+              // Language Selection
+              _buildLanguageCard(context, appState),
+              const SizedBox(height: 16),
+
               // Kalyzet Team Credits
               _buildTeamCreditsCard(),
               const SizedBox(height: 16),
@@ -269,6 +273,157 @@ class ProfileScreen extends StatelessWidget {
               color: Colors.white38,
               size: 18,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageCard(BuildContext context, AppState appState) {
+    // Get current language from AppState
+    final currentLanguage = appState.currentLanguage;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F2937),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF10B981).withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.language,
+                color: Color(0xFF10B981),
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Language / Bahasa',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildLanguageOption(
+                  context,
+                  appState,
+                  'en',
+                  'English',
+                  '🇬🇧',
+                  currentLanguage == 'en',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildLanguageOption(
+                  context,
+                  appState,
+                  'id',
+                  'Bahasa Indonesia',
+                  '🇮🇩',
+                  currentLanguage == 'id',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageOption(
+    BuildContext context,
+    AppState appState,
+    String languageCode,
+    String languageName,
+    String flag,
+    bool isSelected,
+  ) {
+    return InkWell(
+      onTap: () async {
+        if (!isSelected) {
+          try {
+            await appState.changeLanguage(languageCode);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    languageCode == 'en'
+                        ? 'Language changed to English'
+                        : 'Bahasa diubah ke Bahasa Indonesia',
+                  ),
+                  backgroundColor: const Color(0xFF10B981),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error changing language: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF10B981).withOpacity(0.2)
+              : const Color(0xFF111827),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF10B981)
+                : const Color(0xFF374151),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              flag,
+              style: const TextStyle(fontSize: 32),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              languageName,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF10B981) : Colors.white70,
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (isSelected) ...[
+              const SizedBox(height: 4),
+              const Icon(
+                Icons.check_circle,
+                color: Color(0xFF10B981),
+                size: 16,
+              ),
+            ],
           ],
         ),
       ),
