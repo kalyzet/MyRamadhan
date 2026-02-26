@@ -6,6 +6,7 @@ import '../widgets/create_session_dialog.dart';
 import '../widgets/xp_gain_animation.dart';
 import '../widgets/error_display.dart';
 import '../widgets/skeleton_loader.dart';
+import '../widgets/real_time_clock_widget.dart';
 
 /// Home screen displaying daily checklist and progress
 /// Requirements: 10.3, 11.1
@@ -186,6 +187,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Real-time clock widget
+              const RealTimeClockWidget(),
+              const SizedBox(height: 16),
+
               // Ramadhan day indicator
               _buildDayIndicator(currentDay, session.totalDays),
               const SizedBox(height: 24),
