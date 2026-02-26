@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../models/achievement.dart';
 import 'package:intl/intl.dart';
+import '../widgets/skeleton_loader.dart';
 
 /// Achievements screen displaying locked and unlocked achievements
 /// Requirements: 6.6
@@ -14,11 +15,7 @@ class AchievementsScreen extends StatelessWidget {
     return Consumer<AppState>(
       builder: (context, appState, child) {
         if (appState.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFF10B981), // Emerald
-            ),
-          );
+          return const AchievementsScreenSkeleton();
         }
 
         if (appState.activeSession == null) {

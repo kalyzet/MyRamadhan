@@ -4,6 +4,11 @@ import '../models/user_stats.dart';
 
 /// Repository for managing user statistics
 /// Handles CRUD operations for stats and XP/streak updates
+/// 
+/// Performance optimizations (Requirements: 9.3):
+/// - SQLite automatically uses prepared statements for all queries
+/// - Index on session_id column improves query performance
+/// - Efficient update operations with WHERE clauses
 class StatsRepository {
   final DatabaseHelper _dbHelper;
 

@@ -6,6 +6,12 @@ import '../services/validation_service.dart';
 
 /// Repository for managing daily records
 /// Handles CRUD operations and backdating validation
+/// 
+/// Performance optimizations (Requirements: 9.3):
+/// - SQLite automatically uses prepared statements for all queries
+/// - Indexes on session_id and date columns improve query performance
+/// - Batch operations available for bulk inserts/updates
+/// - Transactions ensure atomicity for multi-record operations
 class DailyRecordRepository {
   final DatabaseHelper _dbHelper;
   final ValidationService _validationService;
@@ -133,5 +139,47 @@ class DailyRecordRepository {
     // 1. Get all records from fromDate onwards
     // 2. Recalculate streaks based on consecutive completions
     // 3. Update user_stats table with new streak values
+  }
+
+  /// Batch insert or update multiple daily records
+  /// Uses database transaction for atomicity and performance
+  /// Requirements: 9.3 - Batch operations for performance
+  Future<List<DailyRecord>> batchCreateOrUpdateRecords(
+      List<DailyRecord> records) async {
+    if (records.isEmpty) {
+      return [];
+    }
+
+    try {
+      final db = await _dbHelper.database;
+      final List<DailyRecord> savedRecords = [];
+
+      // Use transaction for batch operations
+      await db.transaction((txn) async {
+        for (final record in records) {
+          // Validate each record
+          _validationService.validateDailyRecord(record);
+
+          final id = await txn.insert(
+            'daily_records',
+            record.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+
+          // Add to saved records with id
+          if (record.id == null) {
+            savedRecords.add(record.copyWith(id: id));
+          } else {
+            savedRecords.add(record);
+          }
+        }
+      });
+
+      return savedRecords;
+    } on app_exceptions.DatabaseException {
+      rethrow;
+    } catch (e) {
+      throw app_exceptions.DatabaseException.transaction(originalError: e);
+    }
   }
 }

@@ -43,6 +43,10 @@ void main() {
     Glados2<int, int>(any.int, any.int).test(
         'Property 27: For any completed session, the final summary should include all required data',
         (year, level) async {
+      // Ensure clean database state
+      await dbHelper.deleteDB();
+      await Future.delayed(const Duration(milliseconds: 50)); // Wait for cleanup
+      
       // Constrain to valid ranges
       final validYear = 2020 + (year.abs() % 11); // 2020-2030
       final validTotalDays = year.abs() % 2 == 0 ? 30 : 29;
@@ -148,6 +152,10 @@ void main() {
     Glados2<int, int>(any.int, any.int).test(
         'Property 28: For any session, the progress comparison should show the difference between end state and start state',
         (startLevel, endLevel) async {
+      // Ensure clean database state
+      await dbHelper.deleteDB();
+      await Future.delayed(const Duration(milliseconds: 50)); // Wait for cleanup
+      
       // Constrain to valid ranges
       final validStartLevel = 1 + (startLevel.abs() % 10); // 1-10
       final validEndLevel = validStartLevel + (endLevel.abs() % 10); // Start level + 0-9
@@ -191,6 +199,10 @@ void main() {
     Glados<int>(any.int).test(
         'Property 29: For any session performance level, the system should select an appropriate motivational message',
         (completedDays) async {
+      // Ensure clean database state
+      await dbHelper.deleteDB();
+      await Future.delayed(const Duration(milliseconds: 50)); // Wait for cleanup
+      
       // Constrain to valid range (0-30 days)
       final validCompletedDays = completedDays.abs() % 31;
       final totalDays = 30;

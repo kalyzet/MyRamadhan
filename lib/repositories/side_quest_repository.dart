@@ -4,6 +4,11 @@ import '../models/side_quest.dart';
 
 /// Repository for managing side quests
 /// Handles CRUD operations and daily quest generation
+/// 
+/// Performance optimizations (Requirements: 9.3):
+/// - SQLite automatically uses prepared statements for all queries
+/// - Indexes on session_id and date columns improve query performance
+/// - Batch operations for generating multiple daily quests
 class SideQuestRepository {
   final DatabaseHelper _dbHelper;
 

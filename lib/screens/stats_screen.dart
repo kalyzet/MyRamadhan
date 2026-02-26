@@ -4,6 +4,7 @@ import '../providers/app_state.dart';
 import '../models/daily_record.dart';
 import '../repositories/daily_record_repository.dart';
 import '../repositories/session_repository.dart';
+import '../widgets/skeleton_loader.dart';
 
 /// Stats screen displaying user statistics and progress
 /// Requirements: 7.1, 7.2, 7.3
@@ -15,11 +16,7 @@ class StatsScreen extends StatelessWidget {
     return Consumer<AppState>(
       builder: (context, appState, child) {
         if (appState.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFF10B981), // Emerald
-            ),
-          );
+          return const StatsScreenSkeleton();
         }
 
         if (appState.activeSession == null) {

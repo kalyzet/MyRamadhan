@@ -47,6 +47,7 @@ class DatabaseHelper {
         path,
         version: 1,
         onCreate: _createDB,
+        singleInstance: false, // Allow multiple instances for testing
       );
     } catch (e) {
       throw app_exceptions.DatabaseException.connection(originalError: e);
@@ -197,10 +198,30 @@ class DatabaseHelper {
   /// Wraps delete operation with error handling
   Future<void> deleteDB() async {
     try {
+      // Close the database first if it's open
+      if (_database != null) {
+        await _database!.close();
+        _database = null;
+      }
+      
+      // Add a small delay to ensure the database is fully closed
+      await Future.delayed(const Duration(milliseconds: 50));
+      
       final dbPath = await getDatabasesPath();
       final path = join(dbPath, 'myramadhan.db');
-      await deleteDatabase(path);
-      _database = null;
+      
+      // Try to delete with retries
+      int retries = 0;
+      while (retries < 3) {
+        try {
+          await deleteDatabase(path);
+          break;
+        } catch (e) {
+          retries++;
+          if (retries >= 3) rethrow;
+          await Future.delayed(const Duration(milliseconds: 50));
+        }
+      }
     } catch (e) {
       throw app_exceptions.DatabaseException.general(
         message: 'Failed to delete database',

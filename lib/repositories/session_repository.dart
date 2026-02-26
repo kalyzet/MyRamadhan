@@ -6,6 +6,11 @@ import '../services/validation_service.dart';
 
 /// Repository for managing Ramadhan sessions
 /// Handles CRUD operations and session activation logic
+/// 
+/// Performance optimizations (Requirements: 9.3):
+/// - SQLite automatically uses prepared statements for all queries
+/// - Indexes on session_id and is_active columns improve query performance
+/// - Transactions ensure atomicity for multi-step operations
 class SessionRepository {
   final DatabaseHelper _dbHelper;
   final ValidationService _validationService;

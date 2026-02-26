@@ -5,6 +5,7 @@ import '../models/daily_record.dart';
 import '../widgets/create_session_dialog.dart';
 import '../widgets/xp_gain_animation.dart';
 import '../widgets/error_display.dart';
+import '../widgets/skeleton_loader.dart';
 
 /// Home screen displaying daily checklist and progress
 /// Requirements: 10.3, 11.1
@@ -107,11 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         if (appState.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Color(0xFF10B981), // Emerald
-            ),
-          );
+          return const HomeScreenSkeleton();
         }
 
         if (appState.activeSession == null) {

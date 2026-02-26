@@ -124,6 +124,10 @@ void main() {
         // Constrain random seed to reasonable range
         if (randomSeed < 0 || randomSeed > 1000) return;
 
+        // Ensure clean database state
+        await dbHelper.deleteDB();
+        await Future.delayed(const Duration(milliseconds: 50)); // Wait for cleanup
+
         // Create a session
         final session = await sessionRepository.createSession(
           year: 2024,
@@ -189,9 +193,6 @@ void main() {
         expect(finalXp, initialXp + expectedXpReward,
             reason:
                 'Total XP should increase by exactly the quest XP reward');
-
-        // Clean up for next iteration
-        await dbHelper.deleteDB();
       },
     );
 
@@ -202,6 +203,10 @@ void main() {
       (numDays, completionPattern) async {
         // Constrain to reasonable number of days (1-10)
         final validNumDays = (numDays.abs() % 10) + 1;
+        
+        // Ensure clean database state
+        await dbHelper.deleteDB();
+        await Future.delayed(const Duration(milliseconds: 50)); // Wait for cleanup
         
         // Create a session
         final session = await sessionRepository.createSession(
@@ -287,9 +292,6 @@ void main() {
             }
           }
         }
-
-        // Clean up for next iteration
-        await dbHelper.deleteDB();
       },
     );
   });

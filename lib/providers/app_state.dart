@@ -42,6 +42,11 @@ class AppState extends ChangeNotifier {
   List<Achievement> _achievements = [];
   List<SideQuest> _todaySideQuests = [];
 
+  // Cache for active session to avoid repeated database queries
+  // Requirements: 9.3 - Query result caching for active session
+  DateTime? _activeSessionCacheTime;
+  static const Duration _cacheValidDuration = Duration(minutes: 5);
+
   // Loading and error state
   bool _isLoading = false;
   String? _errorMessage;
@@ -92,7 +97,18 @@ class AppState extends ChangeNotifier {
 
   /// Load the active session and its associated data
   /// Requirements: 1.1
-  Future<void> loadActiveSession() async {
+  /// Implements caching to avoid repeated database queries (Requirements: 9.3)
+  Future<void> loadActiveSession({bool forceRefresh = false}) async {
+    // Check if we have a valid cached session
+    if (!forceRefresh &&
+        _activeSession != null &&
+        _activeSessionCacheTime != null &&
+        DateTime.now().difference(_activeSessionCacheTime!) <
+            _cacheValidDuration) {
+      // Return cached data
+      return;
+    }
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -100,6 +116,7 @@ class AppState extends ChangeNotifier {
     try {
       // Load active session
       _activeSession = await _sessionRepository.getActiveSession();
+      _activeSessionCacheTime = DateTime.now();
 
       if (_activeSession != null) {
         // Load stats for active session
@@ -214,7 +231,7 @@ class AppState extends ChangeNotifier {
       await _achievementRepository.initializeAchievements(session.id!);
 
       // Reload active session data
-      await loadActiveSession();
+      await loadActiveSession(forceRefresh: true);
 
       return session;
     } on app_exceptions.DatabaseException catch (e) {
@@ -392,6 +409,13 @@ class AppState extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Invalidate the active session cache
+  /// Call this when session data changes to force a refresh on next load
+  /// Requirements: 9.3
+  void invalidateCache() {
+    _activeSessionCacheTime = null;
   }
 
   /// Helper method to check if a day is perfect

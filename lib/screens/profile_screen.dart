@@ -5,6 +5,7 @@ import '../models/ramadhan_session.dart';
 import '../repositories/session_repository.dart';
 import '../widgets/create_session_dialog.dart';
 import 'ramadhan_history_screen.dart';
+import '../widgets/skeleton_loader.dart';
 
 /// Profile screen displaying user session information and team credits
 /// Requirements: 13.1, 13.2, 13.3
@@ -15,6 +16,10 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        if (appState.isLoading) {
+          return const ProfileScreenSkeleton();
+        }
+
         final activeSession = appState.activeSession;
 
         return SingleChildScrollView(

@@ -4,6 +4,11 @@ import '../models/achievement.dart';
 
 /// Repository for managing achievements
 /// Handles CRUD operations and achievement unlocking
+/// 
+/// Performance optimizations (Requirements: 9.3):
+/// - SQLite automatically uses prepared statements for all queries
+/// - Index on session_id column improves query performance
+/// - Batch operations for initializing multiple achievements
 class AchievementRepository {
   final DatabaseHelper _dbHelper;
 
