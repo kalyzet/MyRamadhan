@@ -164,5 +164,11 @@
         "done": "Done",
         "yes": "Yes",
         "no": "No"
+    },
+    "navigation": {
+        "home": "Home",
+        "stats": "Stats",
+        "achievements": "Achievements",
+        "profile": "Profile"
     }
 }

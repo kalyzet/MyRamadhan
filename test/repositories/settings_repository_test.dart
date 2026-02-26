@@ -28,26 +28,29 @@ void main() {
 
     // **Feature: indonesian-default-realtime-clock, Property 1: Default language initialization**
     // **Validates: Requirements 1.2**
-    Glados<int>(any.int).test(
+    test(
         'Property 1: For any fresh installation without existing settings, initializing settings should result in language code being \'id\'',
-        (randomSeed) async {
-      // Ensure database is clean (fresh installation state)
-      await dbHelper.deleteDB();
-      
-      // Reinitialize database
-      await dbHelper.database;
+        () async {
+      // Test multiple fresh installations
+      for (int i = 0; i < 10; i++) {
+        // Ensure database is clean (fresh installation state)
+        await dbHelper.deleteDB();
+        
+        // Create new repository instance
+        final testRepository = SettingsRepository(dbHelper: dbHelper);
 
-      // Initialize settings
-      final settings = await repository.initializeSettings();
+        // Initialize settings
+        final settings = await testRepository.initializeSettings();
 
-      // Verify language code is 'id'
-      expect(settings.languageCode, equals('id'),
-          reason: 'Default language code should be \'id\' for fresh installation');
+        // Verify language code is 'id'
+        expect(settings.languageCode, equals('id'),
+            reason: 'Default language code should be \'id\' for fresh installation (iteration $i)');
 
-      // Verify it persists in database
-      final retrievedSettings = await repository.getSettings();
-      expect(retrievedSettings.languageCode, equals('id'),
-          reason: 'Retrieved settings should also have \'id\' as language code');
+        // Verify it persists in database
+        final retrievedSettings = await testRepository.getSettings();
+        expect(retrievedSettings.languageCode, equals('id'),
+            reason: 'Retrieved settings should also have \'id\' as language code (iteration $i)');
+      }
     });
   });
 

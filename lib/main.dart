@@ -6,6 +6,7 @@ import 'screens/stats_screen.dart';
 import 'screens/achievements_screen.dart';
 import 'screens/profile_screen.dart';
 import 'widgets/error_boundary.dart';
+import 'services/localization_service.dart';
 import 'dart:developer' as developer;
 
 void main() async {
@@ -28,17 +29,53 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final LocalizationService _localizationService = LocalizationService();
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeLocalization();
+  }
+
+  Future<void> _initializeLocalization() async {
+    await _localizationService.initialize();
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
     return ErrorBoundary(
       child: ChangeNotifierProvider(
         create: (_) => AppState()..loadActiveSession(),
         child: MaterialApp(
           title: 'MyRamadhan',
           debugShowCheckedModeBanner: false,
+          locale: Locale(_localizationService.currentLanguage),
+          supportedLocales: const [
+            Locale('id', ''), // Indonesian
+            Locale('en', ''), // English
+          ],
           theme: ThemeData(
             brightness: Brightness.dark,
             scaffoldBackgroundColor: const Color(0xFF111827), // Dark background
@@ -55,7 +92,7 @@ class MyApp extends StatelessWidget {
             ),
             useMaterial3: true,
           ),
-          home: const MainScreen(),
+          home: MainScreen(localizationService: _localizationService),
         ),
       ),
     );
@@ -63,7 +100,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final LocalizationService localizationService;
+
+  const MainScreen({super.key, required this.localizationService});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -81,6 +120,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localization = widget.localizationService;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -130,22 +171,22 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: const Color(0xFF1F2937),
         selectedItemColor: const Color(0xFF10B981), // Emerald
         unselectedItemColor: Colors.white38,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home),
+            label: localization.translate('navigation.home'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Stats',
+            icon: const Icon(Icons.bar_chart),
+            label: localization.translate('navigation.stats'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events),
-            label: 'Achievements',
+            icon: const Icon(Icons.emoji_events),
+            label: localization.translate('navigation.achievements'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person),
+            label: localization.translate('navigation.profile'),
           ),
         ],
       ),

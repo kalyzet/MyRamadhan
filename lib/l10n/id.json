@@ -164,5 +164,11 @@
         "done": "Selesai",
         "yes": "Ya",
         "no": "Tidak"
+    },
+    "navigation": {
+        "home": "Beranda",
+        "stats": "Statistik",
+        "achievements": "Pencapaian",
+        "profile": "Profil"
     }
 }
