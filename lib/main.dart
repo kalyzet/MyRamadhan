@@ -5,9 +5,26 @@ import 'screens/home_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/achievements_screen.dart';
 import 'screens/profile_screen.dart';
+import 'widgets/error_boundary.dart';
+import 'dart:developer' as developer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Set up global error handler
+  FlutterError.onError = (FlutterErrorDetails details) {
+    // Log error for debugging
+    developer.log(
+      'Flutter error',
+      error: details.exception,
+      stackTrace: details.stack,
+      name: 'MyRamadhan',
+    );
+
+    // In production, you might want to send this to a crash reporting service
+    FlutterError.presentError(details);
+  };
+
   runApp(const MyApp());
 }
 
@@ -16,28 +33,30 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppState()..loadActiveSession(),
-      child: MaterialApp(
-        title: 'MyRamadhan',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: const Color(0xFF111827), // Dark background
-          primaryColor: const Color(0xFF10B981), // Emerald
-          colorScheme: const ColorScheme.dark(
-            primary: Color(0xFF10B981), // Emerald
-            secondary: Color(0xFFD97706), // Gold
-            surface: Color(0xFF1F2937), // Dark gray
-            background: Color(0xFF111827), // Darker gray
+    return ErrorBoundary(
+      child: ChangeNotifierProvider(
+        create: (_) => AppState()..loadActiveSession(),
+        child: MaterialApp(
+          title: 'MyRamadhan',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF111827), // Dark background
+            primaryColor: const Color(0xFF10B981), // Emerald
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF10B981), // Emerald
+              secondary: Color(0xFFD97706), // Gold
+              surface: Color(0xFF1F2937), // Dark gray
+              background: Color(0xFF111827), // Darker gray
+            ),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF1F2937),
+              elevation: 0,
+            ),
+            useMaterial3: true,
           ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF1F2937),
-            elevation: 0,
-          ),
-          useMaterial3: true,
+          home: const MainScreen(),
         ),
-        home: const MainScreen(),
       ),
     );
   }

@@ -13,6 +13,9 @@ import '../services/xp_calculator_service.dart';
 import '../services/level_calculator_service.dart';
 import '../services/streak_tracker_service.dart';
 import '../services/achievement_tracker_service.dart';
+import '../services/validation_service.dart';
+import '../exceptions/database_exception.dart' as app_exceptions;
+import '../exceptions/validation_exception.dart';
 
 /// AppState provider class for managing application state
 /// Implements state management layer with Provider pattern
@@ -30,6 +33,7 @@ class AppState extends ChangeNotifier {
   final LevelCalculatorService _levelCalculatorService;
   final StreakTrackerService _streakTrackerService;
   final AchievementTrackerService _achievementTrackerService;
+  final ValidationService _validationService;
 
   // State
   RamadhanSession? _activeSession;
@@ -38,8 +42,9 @@ class AppState extends ChangeNotifier {
   List<Achievement> _achievements = [];
   List<SideQuest> _todaySideQuests = [];
 
-  // Loading state
+  // Loading and error state
   bool _isLoading = false;
+  String? _errorMessage;
 
   // Animation callbacks
   void Function(int xpAmount)? onXpGained;
@@ -52,6 +57,7 @@ class AppState extends ChangeNotifier {
   List<Achievement> get achievements => _achievements;
   List<SideQuest> get todaySideQuests => _todaySideQuests;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
 
   AppState({
     SessionRepository? sessionRepository,
@@ -63,6 +69,7 @@ class AppState extends ChangeNotifier {
     LevelCalculatorService? levelCalculatorService,
     StreakTrackerService? streakTrackerService,
     AchievementTrackerService? achievementTrackerService,
+    ValidationService? validationService,
   })  : _sessionRepository = sessionRepository ?? SessionRepository(),
         _dailyRecordRepository =
             dailyRecordRepository ?? DailyRecordRepository(),
@@ -80,12 +87,14 @@ class AppState extends ChangeNotifier {
               statsRepository: statsRepository ?? StatsRepository(),
             ),
         _achievementTrackerService =
-            achievementTrackerService ?? AchievementTrackerService();
+            achievementTrackerService ?? AchievementTrackerService(),
+        _validationService = validationService ?? ValidationService();
 
   /// Load the active session and its associated data
   /// Requirements: 1.1
   Future<void> loadActiveSession() async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -140,6 +149,12 @@ class AppState extends ChangeNotifier {
           );
         }
       }
+    } on app_exceptions.DatabaseException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    } catch (e) {
+      _errorMessage = 'An unexpected error occurred. Please try again.';
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -154,7 +169,20 @@ class AppState extends ChangeNotifier {
     required int totalDays,
     int? currentDayNumber,
   }) async {
+    // Validate inputs
+    try {
+      _validationService.validateSessionCreation(
+        year: year,
+        startDate: startDate,
+        totalDays: totalDays,
+      );
+    } on ValidationException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    }
+
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -189,6 +217,12 @@ class AppState extends ChangeNotifier {
       await loadActiveSession();
 
       return session;
+    } on app_exceptions.DatabaseException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    } catch (e) {
+      _errorMessage = 'Failed to create session. Please try again.';
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -200,10 +234,22 @@ class AppState extends ChangeNotifier {
   /// Requirements: 2.1
   Future<void> updateDailyRecord(DailyRecord record) async {
     if (_activeSession == null) {
+      _errorMessage = 'No active session. Please create a session first.';
       throw StateError('No active session');
     }
 
+    // Validate the record
+    try {
+      _validationService.validateDailyRecord(record);
+      _validationService.validateDateInSession(record.date, _activeSession!);
+      _validationService.validateBackdating(record.date, DateTime.now());
+    } on ValidationException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    }
+
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -283,6 +329,12 @@ class AppState extends ChangeNotifier {
       if (recordDate == todayDate) {
         _todayRecord = savedRecord;
       }
+    } on app_exceptions.DatabaseException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    } catch (e) {
+      _errorMessage = 'Failed to update record. Please try again.';
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -293,10 +345,12 @@ class AppState extends ChangeNotifier {
   /// Requirements: 5.2
   Future<void> completeSideQuest(int questId) async {
     if (_activeSession == null) {
+      _errorMessage = 'No active session. Please create a session first.';
       throw StateError('No active session');
     }
 
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -322,10 +376,22 @@ class AppState extends ChangeNotifier {
         _activeSession!.id!,
         today,
       );
+    } on app_exceptions.DatabaseException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    } catch (e) {
+      _errorMessage = 'Failed to complete quest. Please try again.';
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Clear error message
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 
   /// Helper method to check if a day is perfect

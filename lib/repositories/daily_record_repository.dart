@@ -1,70 +1,106 @@
 import 'package:sqflite/sqflite.dart';
 import '../database/database_helper.dart';
 import '../models/daily_record.dart';
+import '../exceptions/database_exception.dart' as app_exceptions;
+import '../services/validation_service.dart';
 
 /// Repository for managing daily records
 /// Handles CRUD operations and backdating validation
 class DailyRecordRepository {
   final DatabaseHelper _dbHelper;
+  final ValidationService _validationService;
 
-  DailyRecordRepository({DatabaseHelper? dbHelper})
-      : _dbHelper = dbHelper ?? DatabaseHelper.instance;
+  DailyRecordRepository({
+    DatabaseHelper? dbHelper,
+    ValidationService? validationService,
+  })  : _dbHelper = dbHelper ?? DatabaseHelper.instance,
+        _validationService = validationService ?? ValidationService();
 
   /// Create or update a daily record
   /// Uses REPLACE conflict algorithm to handle updates
   Future<DailyRecord> createOrUpdateRecord(DailyRecord record) async {
-    final db = await _dbHelper.database;
+    // Validate the record first (before try-catch to let ValidationException propagate)
+    _validationService.validateDailyRecord(record);
 
-    final id = await db.insert(
-      'daily_records',
-      record.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    try {
+      final db = await _dbHelper.database;
 
-    // If record had no id, return with new id
-    if (record.id == null) {
-      return record.copyWith(id: id);
+      final id = await db.insert(
+        'daily_records',
+        record.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // If record had no id, return with new id
+      if (record.id == null) {
+        return record.copyWith(id: id);
+      }
+
+      // Otherwise return the record as-is
+      return record;
+    } on app_exceptions.DatabaseException {
+      rethrow;
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to save daily record',
+        originalError: e,
+      );
     }
-
-    // Otherwise return the record as-is
-    return record;
   }
 
   /// Get a daily record for a specific date and session
   Future<DailyRecord?> getRecordByDate(int sessionId, DateTime date) async {
-    final db = await _dbHelper.database;
+    try {
+      final db = await _dbHelper.database;
 
-    // Normalize date to start of day for comparison
-    final normalizedDate = DateTime(date.year, date.month, date.day);
+      // Normalize date to start of day for comparison
+      final normalizedDate = DateTime(date.year, date.month, date.day);
 
-    final List<Map<String, dynamic>> maps = await db.query(
-      'daily_records',
-      where: 'session_id = ? AND date = ?',
-      whereArgs: [sessionId, normalizedDate.toIso8601String()],
-      limit: 1,
-    );
+      final List<Map<String, dynamic>> maps = await db.query(
+        'daily_records',
+        where: 'session_id = ? AND date = ?',
+        whereArgs: [sessionId, normalizedDate.toIso8601String()],
+        limit: 1,
+      );
 
-    if (maps.isEmpty) {
-      return null;
+      if (maps.isEmpty) {
+        return null;
+      }
+
+      return DailyRecord.fromMap(maps.first);
+    } on app_exceptions.DatabaseException {
+      rethrow;
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to get daily record',
+        originalError: e,
+      );
     }
-
-    return DailyRecord.fromMap(maps.first);
   }
 
   /// Get all records for a session, ordered by date ascending
   Future<List<DailyRecord>> getRecordsForSession(int sessionId) async {
-    final db = await _dbHelper.database;
+    try {
+      final db = await _dbHelper.database;
 
-    final List<Map<String, dynamic>> maps = await db.query(
-      'daily_records',
-      where: 'session_id = ?',
-      whereArgs: [sessionId],
-      orderBy: 'date ASC',
-    );
+      final List<Map<String, dynamic>> maps = await db.query(
+        'daily_records',
+        where: 'session_id = ?',
+        whereArgs: [sessionId],
+        orderBy: 'date ASC',
+      );
 
-    return List.generate(maps.length, (i) {
-      return DailyRecord.fromMap(maps[i]);
-    });
+      return List.generate(maps.length, (i) {
+        return DailyRecord.fromMap(maps[i]);
+      });
+    } on app_exceptions.DatabaseException {
+      rethrow;
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to get session records',
+        originalError: e,
+      );
+    }
   }
 
   /// Check if a record can be modified based on backdating rules

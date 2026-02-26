@@ -4,6 +4,8 @@ import 'package:glados/glados.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:my_ramadhan/database/database_helper.dart';
 import 'package:my_ramadhan/repositories/daily_record_repository.dart';
+import 'package:my_ramadhan/models/daily_record.dart';
+import 'package:my_ramadhan/exceptions/validation_exception.dart';
 
 void main() {
   // Initialize FFI for testing
@@ -47,4 +49,97 @@ void main() {
               'For $daysDifference days difference, expected canModify=$expectedCanModify but got $canModify');
     });
   });
+
+  group('DailyRecordRepository Validation Tests', () {
+    late DatabaseHelper dbHelper;
+    late DailyRecordRepository repository;
+
+    setUp(() async {
+      dbHelper = DatabaseHelper.instance;
+      await dbHelper.deleteDB();
+      repository = DailyRecordRepository(dbHelper: dbHelper);
+    });
+
+    tearDown(() async {
+      await dbHelper.deleteDB();
+    });
+
+    test('createOrUpdateRecord should reject invalid tilawah pages', () async {
+      final record = _createTestRecord(
+        sessionId: 1,
+        date: DateTime(2024, 3, 15),
+        tilawahPages: 700, // Invalid
+      );
+
+      expect(
+        () => repository.createOrUpdateRecord(record),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('createOrUpdateRecord should reject negative sedekah amount', () async {
+      final record = _createTestRecord(
+        sessionId: 1,
+        date: DateTime(2024, 3, 15),
+        sedekahAmount: -10.0, // Invalid
+      );
+
+      expect(
+        () => repository.createOrUpdateRecord(record),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('createOrUpdateRecord should reject negative XP', () async {
+      final record = _createTestRecord(
+        sessionId: 1,
+        date: DateTime(2024, 3, 15),
+        xpEarned: -100, // Invalid
+      );
+
+      expect(
+        () => repository.createOrUpdateRecord(record),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('createOrUpdateRecord should accept valid record', () async {
+      final record = _createTestRecord(
+        sessionId: 1,
+        date: DateTime(2024, 3, 15),
+        tilawahPages: 10,
+        sedekahAmount: 50.0,
+        xpEarned: 200,
+      );
+
+      final saved = await repository.createOrUpdateRecord(record);
+      expect(saved.id, isNotNull);
+    });
+  });
+}
+
+// Helper function to create test records
+DailyRecord _createTestRecord({
+  required int sessionId,
+  required DateTime date,
+  int tilawahPages = 0,
+  double sedekahAmount = 0,
+  int xpEarned = 0,
+}) {
+  return DailyRecord(
+    sessionId: sessionId,
+    date: date,
+    fajrComplete: false,
+    dhuhrComplete: false,
+    asrComplete: false,
+    maghribComplete: false,
+    ishaComplete: false,
+    puasaComplete: false,
+    tarawihComplete: false,
+    tilawahPages: tilawahPages,
+    dzikirComplete: false,
+    sedekahAmount: sedekahAmount,
+    xpEarned: xpEarned,
+    isPerfectDay: false,
+  );
 }

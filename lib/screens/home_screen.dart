@@ -4,6 +4,7 @@ import '../providers/app_state.dart';
 import '../models/daily_record.dart';
 import '../widgets/create_session_dialog.dart';
 import '../widgets/xp_gain_animation.dart';
+import '../widgets/error_display.dart';
 
 /// Home screen displaying daily checklist and progress
 /// Requirements: 10.3, 11.1
@@ -97,6 +98,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        // Show error message if present
+        if (appState.errorMessage != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ErrorDisplay.showSnackBar(context, appState.errorMessage!);
+            appState.clearError();
+          });
+        }
+
         if (appState.isLoading) {
           return const Center(
             child: CircularProgressIndicator(

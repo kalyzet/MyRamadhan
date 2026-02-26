@@ -1,37 +1,64 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../exceptions/database_exception.dart' as app_exceptions;
 
 /// Database helper class for managing SQLite database operations
 /// Implements singleton pattern to ensure single database instance
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static const int _maxRetries = 3;
+  static const Duration _retryDelay = Duration(milliseconds: 500);
 
   DatabaseHelper._init();
 
   /// Get database instance, initialize if not exists
+  /// Implements retry logic for transient errors
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('myramadhan.db');
-    return _database!;
+
+    int retryCount = 0;
+    while (retryCount < _maxRetries) {
+      try {
+        _database = await _initDB('myramadhan.db');
+        return _database!;
+      } catch (e) {
+        retryCount++;
+        if (retryCount >= _maxRetries) {
+          throw app_exceptions.DatabaseException.connection(originalError: e);
+        }
+        // Wait before retrying
+        await Future.delayed(_retryDelay);
+      }
+    }
+
+    throw app_exceptions.DatabaseException.connection(
+        originalError: 'Max retries exceeded');
   }
 
   /// Initialize database with schema
+  /// Wraps database operations with error handling
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, filePath);
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
+      return await openDatabase(
+        path,
+        version: 1,
+        onCreate: _createDB,
+      );
+    } catch (e) {
+      throw app_exceptions.DatabaseException.connection(originalError: e);
+    }
   }
 
   /// Create all database tables and indexes
+  /// Wraps table creation with error handling
   Future<void> _createDB(Database db, int version) async {
-    // Create ramadhan_sessions table
-    await db.execute('''
+    try {
+      // Create ramadhan_sessions table
+      await db.execute('''
       CREATE TABLE ramadhan_sessions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         year INTEGER NOT NULL,
@@ -43,8 +70,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create daily_records table with individual prayer columns
-    await db.execute('''
+      // Create daily_records table with individual prayer columns
+      await db.execute('''
       CREATE TABLE daily_records (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL,
@@ -66,8 +93,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create user_stats table
-    await db.execute('''
+      // Create user_stats table
+      await db.execute('''
       CREATE TABLE user_stats (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL UNIQUE,
@@ -81,8 +108,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create achievements table
-    await db.execute('''
+      // Create achievements table
+      await db.execute('''
       CREATE TABLE achievements (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL,
@@ -95,8 +122,8 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create side_quests table
-    await db.execute('''
+      // Create side_quests table
+      await db.execute('''
       CREATE TABLE side_quests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL,
@@ -109,54 +136,76 @@ class DatabaseHelper {
       )
     ''');
 
-    // Create indexes for performance optimization
-    await db.execute('''
+      // Create indexes for performance optimization
+      await db.execute('''
       CREATE INDEX idx_daily_records_session_id 
       ON daily_records(session_id)
     ''');
 
-    await db.execute('''
+      await db.execute('''
       CREATE INDEX idx_daily_records_date 
       ON daily_records(date)
     ''');
 
-    await db.execute('''
+      await db.execute('''
       CREATE INDEX idx_user_stats_session_id 
       ON user_stats(session_id)
     ''');
 
-    await db.execute('''
+      await db.execute('''
       CREATE INDEX idx_achievements_session_id 
       ON achievements(session_id)
     ''');
 
-    await db.execute('''
+      await db.execute('''
       CREATE INDEX idx_side_quests_session_id 
       ON side_quests(session_id)
     ''');
 
-    await db.execute('''
+      await db.execute('''
       CREATE INDEX idx_side_quests_date 
       ON side_quests(date)
     ''');
 
-    await db.execute('''
+      await db.execute('''
       CREATE INDEX idx_ramadhan_sessions_is_active 
       ON ramadhan_sessions(is_active)
     ''');
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to create database schema',
+        originalError: e,
+      );
+    }
   }
 
   /// Close database connection
+  /// Wraps close operation with error handling
   Future<void> close() async {
-    final db = await instance.database;
-    await db.close();
+    try {
+      final db = await instance.database;
+      await db.close();
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to close database',
+        originalError: e,
+      );
+    }
   }
 
   /// Delete database (useful for testing)
+  /// Wraps delete operation with error handling
   Future<void> deleteDB() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'myramadhan.db');
-    await deleteDatabase(path);
-    _database = null;
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'myramadhan.db');
+      await deleteDatabase(path);
+      _database = null;
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to delete database',
+        originalError: e,
+      );
+    }
   }
 }

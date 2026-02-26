@@ -144,4 +144,63 @@ void main() {
       }
     });
   });
+
+  group('SessionRepository Business Rule Validation Tests', () {
+    late DatabaseHelper dbHelper;
+    late SessionRepository repository;
+
+    setUp(() async {
+      dbHelper = DatabaseHelper.instance;
+      await dbHelper.deleteDB();
+      repository = SessionRepository(dbHelper: dbHelper);
+    });
+
+    tearDown(() async {
+      await dbHelper.deleteDB();
+    });
+
+    test('verifyActiveSessionInvariant should pass with zero active sessions', () async {
+      await repository.verifyActiveSessionInvariant();
+      // Should not throw
+    });
+
+    test('verifyActiveSessionInvariant should pass with one active session', () async {
+      final session = await repository.createSession(
+        year: 2024,
+        startDate: DateTime(2024, 3, 11),
+        totalDays: 30,
+      );
+      await repository.setActiveSession(session.id!);
+
+      await repository.verifyActiveSessionInvariant();
+      // Should not throw
+    });
+
+    test('verifyActiveSessionInvariant maintains invariant after multiple activations', () async {
+      // Create multiple sessions
+      final session1 = await repository.createSession(
+        year: 2024,
+        startDate: DateTime(2024, 3, 11),
+        totalDays: 30,
+      );
+      final session2 = await repository.createSession(
+        year: 2023,
+        startDate: DateTime(2023, 3, 23),
+        totalDays: 30,
+      );
+
+      // Activate first session
+      await repository.setActiveSession(session1.id!);
+      await repository.verifyActiveSessionInvariant();
+
+      // Activate second session
+      await repository.setActiveSession(session2.id!);
+      await repository.verifyActiveSessionInvariant();
+
+      // Verify only one is active
+      final allSessions = await repository.getAllSessions();
+      final activeSessions = allSessions.where((s) => s.isActive).toList();
+      expect(activeSessions.length, equals(1));
+    });
+  });
 }
