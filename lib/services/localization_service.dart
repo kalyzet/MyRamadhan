@@ -27,34 +27,13 @@ class LocalizationService {
       _translations = json.decode(jsonString) as Map<String, dynamic>;
       _currentLanguage = languageCode;
     } catch (e) {
-      // If loading fails, fall back to Indonesian first, then English
-      if (languageCode == 'id') {
-        // If Indonesian fails, try English
-        try {
-          final String jsonString =
-              await rootBundle.loadString('lib/l10n/en.json');
-          _translations = json.decode(jsonString) as Map<String, dynamic>;
-          _currentLanguage = 'en';
-        } catch (e) {
-          // If both fail, use empty translations with Indonesian as default
-          _translations = {};
-          _currentLanguage = 'id';
-        }
-      } else if (languageCode == 'en') {
-        // If English fails, try Indonesian
-        try {
-          final String jsonString =
-              await rootBundle.loadString('lib/l10n/id.json');
-          _translations = json.decode(jsonString) as Map<String, dynamic>;
-          _currentLanguage = 'id';
-        } catch (e) {
-          // If both fail, use empty translations with Indonesian as default
-          _translations = {};
-          _currentLanguage = 'id';
-        }
-      } else {
-        // For any other language, fall back to Indonesian
+      // If loading fails, fall back to Indonesian
+      if (languageCode != 'id') {
         await loadLanguage('id');
+      } else {
+        // If even Indonesian fails, use empty translations
+        _translations = {};
+        _currentLanguage = 'id';
       }
     }
   }
