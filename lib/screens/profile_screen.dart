@@ -39,14 +39,14 @@ class ProfileScreen extends StatelessWidget {
                   if (result == true && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Session created! Previous session deactivated.'),
+                        content: Text('Sesi dibuat! Sesi sebelumnya dinonaktifkan.'),
                         backgroundColor: Color(0xFF10B981),
                       ),
                     );
                   }
                 },
                 icon: const Icon(Icons.add_circle_outline),
-                label: const Text('Create New Session'),
+                label: const Text('Buat Sesi Baru'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10B981),
                   foregroundColor: Colors.white,
@@ -114,7 +114,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               SizedBox(width: 12),
               Text(
-                'Active Session',
+                'Sesi Aktif',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -124,21 +124,21 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _buildSessionInfoRow('Year', '${session.year}'),
+          _buildSessionInfoRow('Tahun', '${session.year}'),
           const SizedBox(height: 12),
           _buildSessionInfoRow(
-            'Duration',
-            '${session.totalDays} days',
+            'Durasi',
+            '${session.totalDays} hari',
           ),
           const SizedBox(height: 12),
           _buildSessionInfoRow(
-            'Current Day',
-            'Day $currentDay of ${session.totalDays}',
+            'Hari Saat Ini',
+            'Hari $currentDay dari ${session.totalDays}',
           ),
           const SizedBox(height: 12),
           _buildSessionInfoRow(
-            'Days Remaining',
-            '$daysRemaining days',
+            'Hari Tersisa',
+            '$daysRemaining hari',
           ),
         ],
       ),
@@ -165,7 +165,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           SizedBox(height: 16),
           Text(
-            'No Active Session',
+            'Tidak Ada Sesi Aktif',
             style: TextStyle(
               color: Colors.white70,
               fontSize: 18,
@@ -174,7 +174,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           SizedBox(height: 8),
           Text(
-            'Create a new Ramadhan session to start tracking your journey',
+            'Buat sesi Ramadhan baru untuk mulai melacak perjalanan Anda',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white38,
@@ -250,7 +250,7 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ramadhan History',
+                    'Riwayat Ramadhan',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -259,7 +259,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'View all your previous sessions',
+                    'Lihat semua sesi sebelumnya',
                     style: TextStyle(
                       color: Colors.white60,
                       fontSize: 13,
@@ -469,7 +469,7 @@ class ProfileScreen extends StatelessWidget {
 
           // Team Name
           const Text(
-            'Developed by',
+            'Dikembangkan oleh',
             style: TextStyle(
               color: Colors.white60,
               fontSize: 14,
@@ -488,7 +488,7 @@ class ProfileScreen extends StatelessWidget {
 
           // Description
           const Text(
-            'Building tools to enhance your spiritual journey',
+            'Membangun alat untuk meningkatkan perjalanan spiritual Anda',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white70,
@@ -519,7 +519,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               SizedBox(width: 12),
               Text(
-                'About',
+                'Tentang',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -529,14 +529,14 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildAboutRow('App Name', 'MyRamadhan'),
+          _buildAboutRow('Nama Aplikasi', 'MyRamadhan'),
           const SizedBox(height: 12),
-          _buildAboutRow('Version', '1.0.0'),
+          _buildAboutRow('Versi', '1.0.0'),
           const SizedBox(height: 12),
           _buildAboutRow('Platform', 'Flutter'),
           const SizedBox(height: 16),
           const Text(
-            'MyRamadhan is a gamified companion app that helps you track your ibadah activities, build consistency through streaks, and reflect on your spiritual journey during Ramadhan.',
+            'MyRamadhan adalah aplikasi pendamping gamifikasi yang membantu Anda melacak aktivitas ibadah, membangun konsistensi melalui streak, dan merefleksikan perjalanan spiritual Anda selama Ramadhan.',
             style: TextStyle(
               color: Colors.white60,
               fontSize: 13,

@@ -93,7 +93,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Ramadhan session created successfully!'),
+            content: Text('Sesi Ramadhan berhasil dibuat!'),
             backgroundColor: Color(0xFF10B981),
           ),
         );
@@ -102,7 +102,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating session: $e'),
+            content: Text('Kesalahan membuat sesi: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -142,7 +142,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                     ),
                     SizedBox(width: 12),
                     Text(
-                      'Create New Session',
+                      'Buat Sesi Baru',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -159,9 +159,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Year',
+                    labelText: 'Tahun',
                     labelStyle: const TextStyle(color: Colors.white70),
-                    hintText: 'e.g., 2024',
+                    hintText: 'contoh: 2024',
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(
                       Icons.calendar_today,
@@ -188,14 +188,14 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a year';
+                      return 'Silakan masukkan tahun';
                     }
                     final year = int.tryParse(value);
                     if (year == null) {
-                      return 'Please enter a valid year';
+                      return 'Silakan masukkan tahun yang valid';
                     }
                     if (year < 2020 || year > 2100) {
-                      return 'Year must be between 2020 and 2100';
+                      return 'Tahun harus antara 2020 dan 2100';
                     }
                     return null;
                   },
@@ -224,7 +224,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Start Date',
+                                'Tanggal Mulai',
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
@@ -271,7 +271,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           ),
                           SizedBox(width: 8),
                           Text(
-                            'Duration',
+                            'Durasi',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
@@ -317,7 +317,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           const SizedBox(width: 8),
                           const Expanded(
                             child: Text(
-                              'Starting mid-Ramadhan?',
+                              'Mulai di tengah Ramadhan?',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
@@ -342,9 +342,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           keyboardType: TextInputType.number,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
-                            labelText: 'Current Day Number',
+                            labelText: 'Nomor Hari Saat Ini',
                             labelStyle: const TextStyle(color: Colors.white70),
-                            hintText: 'e.g., 15',
+                            hintText: 'contoh: 15',
                             hintStyle: const TextStyle(color: Colors.white38),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -374,14 +374,14 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           validator: (value) {
                             if (_isMidRamadhan) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter current day number';
+                                return 'Silakan masukkan nomor hari saat ini';
                               }
                               final day = int.tryParse(value);
                               if (day == null) {
-                                return 'Please enter a valid number';
+                                return 'Silakan masukkan nomor yang valid';
                               }
                               if (day < 1 || day > _duration) {
-                                return 'Day must be between 1 and $_duration';
+                                return 'Hari harus antara 1 dan $_duration';
                               }
                             }
                             return null;
@@ -409,7 +409,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           ),
                         ),
                         child: const Text(
-                          'Cancel',
+                          'Batal',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
@@ -440,7 +440,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                                 ),
                               )
                             : const Text(
-                                'Create',
+                                'Buat',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -480,7 +480,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
         ),
         child: Center(
           child: Text(
-            '$days Days',
+            '$days Hari',
             style: TextStyle(
               color: isSelected ? Colors.white : Colors.white70,
               fontSize: 16,

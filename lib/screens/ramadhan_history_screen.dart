@@ -91,7 +91,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Ramadhan History',
+          'Riwayat Ramadhan',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -107,7 +107,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
             IconButton(
               icon: const Icon(Icons.compare_arrows, color: Colors.white),
               onPressed: _navigateToComparison,
-              tooltip: 'Compare Sessions',
+              tooltip: 'Bandingkan Sesi',
             ),
         ],
       ),
@@ -149,7 +149,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              'No Ramadhan Sessions Yet',
+              'Belum Ada Sesi Ramadhan',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 18,
@@ -158,7 +158,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
             ),
             SizedBox(height: 8),
             Text(
-              'Create your first session to start tracking',
+              'Buat sesi pertama Anda untuk mulai melacak',
               style: TextStyle(
                 color: Colors.white38,
                 fontSize: 14,
@@ -204,7 +204,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Tap sessions to select them for comparison',
+                      'Ketuk sesi untuk memilihnya untuk perbandingan',
                       style: TextStyle(
                         color: Color(0xFF10B981),
                         fontSize: 13,
@@ -237,7 +237,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '${_selectedSessionIds.length} session${_selectedSessionIds.length == 1 ? '' : 's'} selected',
+                        '${_selectedSessionIds.length} sesi dipilih',
                         style: const TextStyle(
                           color: Color(0xFFD97706),
                           fontSize: 13,
@@ -253,7 +253,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       });
                     },
                     child: const Text(
-                      'Clear',
+                      'Bersihkan',
                       style: TextStyle(
                         color: Color(0xFFD97706),
                         fontSize: 13,
@@ -303,7 +303,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
             ),
           ),
           Text(
-            totalSessions == 1 ? 'Ramadhan Session' : 'Ramadhan Sessions',
+            totalSessions == 1 ? 'Sesi Ramadhan' : 'Sesi Ramadhan',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -394,7 +394,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'ACTIVE',
+                        'AKTIF',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -460,7 +460,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       children: [
                         Expanded(
                           child: _buildStatItem(
-                            'Longest Streak',
+                            'Streak Terpanjang',
                             '${stats.longestStreak}',
                             Icons.local_fire_department,
                             const Color(0xFFEF4444),
@@ -469,7 +469,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatItem(
-                            'Completion',
+                            'Penyelesaian',
                             '${completionRate.toStringAsFixed(0)}%',
                             Icons.check_circle,
                             const Color(0xFF10B981),
@@ -480,7 +480,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                   ] else
                     const Center(
                       child: Text(
-                        'No statistics available',
+                        'Tidak ada statistik tersedia',
                         style: TextStyle(
                           color: Colors.white38,
                           fontSize: 13,
