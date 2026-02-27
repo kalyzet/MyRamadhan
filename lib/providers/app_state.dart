@@ -43,7 +43,7 @@ class AppState extends ChangeNotifier {
   DailyRecord? _todayRecord;
   List<Achievement> _achievements = [];
   List<SideQuest> _todaySideQuests = [];
-  String _currentLanguage = 'en';
+  String _currentLanguage = 'id';
 
   // Cache for active session to avoid repeated database queries
   // Requirements: 9.3 - Query result caching for active session
@@ -112,8 +112,8 @@ class AppState extends ChangeNotifier {
       _currentLanguage = _localizationService.currentLanguage;
       notifyListeners();
     } catch (e) {
-      // If initialization fails, default to English
-      _currentLanguage = 'en';
+      // If initialization fails, default to Indonesian
+      _currentLanguage = 'id';
     }
   }
 
