@@ -21,7 +21,7 @@ class AchievementsScreen extends StatelessWidget {
         if (appState.activeSession == null) {
           return const Center(
             child: Text(
-              'No active session. Please create a new Ramadhan session.',
+              'Tidak ada sesi aktif. Silakan buat sesi Ramadhan baru.',
               style: TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -33,7 +33,7 @@ class AchievementsScreen extends StatelessWidget {
         if (achievements.isEmpty) {
           return const Center(
             child: Text(
-              'No achievements available.',
+              'Tidak ada pencapaian tersedia.',
               style: TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -58,7 +58,7 @@ class AchievementsScreen extends StatelessWidget {
               // Unlocked achievements section
               if (unlockedAchievements.isNotEmpty) ...[
                 const Text(
-                  'Unlocked',
+                  'Terbuka',
                   style: TextStyle(
                     color: Color(0xFFD97706), // Gold
                     fontSize: 20,
@@ -73,7 +73,7 @@ class AchievementsScreen extends StatelessWidget {
               // Locked achievements section
               if (lockedAchievements.isNotEmpty) ...[
                 const Text(
-                  'Locked',
+                  'Terkunci',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 20,
@@ -115,7 +115,7 @@ class AchievementsScreen extends StatelessWidget {
               ),
               SizedBox(width: 12),
               Text(
-                'Achievements',
+                'Pencapaian',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -126,7 +126,7 @@ class AchievementsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '$unlocked / $total Unlocked',
+            '$unlocked / $total Terbuka',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -145,7 +145,7 @@ class AchievementsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${(progress * 100).toStringAsFixed(0)}% Complete',
+            '${(progress * 100).toStringAsFixed(0)}% Selesai',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,

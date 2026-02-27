@@ -64,53 +64,53 @@ class SideQuestRepository {
     // Define quest pool
     final questPool = [
       {
-        'title': 'Early Bird',
-        'description': 'Pray Fajr within 15 minutes of Adhan',
+        'title': 'Burung Pagi',
+        'description': 'Sholat Subuh dalam 15 menit setelah Adzan',
         'xp_reward': 25,
       },
       {
-        'title': 'Quran Scholar',
-        'description': 'Read 5 pages of Quran with translation',
+        'title': 'Ahli Al-Quran',
+        'description': 'Baca 5 halaman Al-Quran dengan terjemahan',
         'xp_reward': 30,
       },
       {
-        'title': 'Generous Soul',
-        'description': 'Give sedekah to 3 different people',
+        'title': 'Jiwa Dermawan',
+        'description': 'Berikan sedekah kepada 3 orang berbeda',
         'xp_reward': 40,
       },
       {
-        'title': 'Community Helper',
-        'description': 'Help prepare iftar for others',
+        'title': 'Penolong Komunitas',
+        'description': 'Bantu menyiapkan iftar untuk orang lain',
         'xp_reward': 35,
       },
       {
-        'title': 'Dhikr Master',
-        'description': 'Recite Subhanallah 100 times',
+        'title': 'Master Dzikir',
+        'description': 'Ucapkan Subhanallah 100 kali',
         'xp_reward': 20,
       },
       {
-        'title': 'Night Warrior',
-        'description': 'Pray Tahajjud before Fajr',
+        'title': 'Pejuang Malam',
+        'description': 'Sholat Tahajjud sebelum Subuh',
         'xp_reward': 45,
       },
       {
-        'title': 'Dua Specialist',
-        'description': 'Make dua for 10 different people',
+        'title': 'Spesialis Doa',
+        'description': 'Berdoa untuk 10 orang berbeda',
         'xp_reward': 25,
       },
       {
-        'title': 'Knowledge Seeker',
-        'description': 'Attend or watch an Islamic lecture',
+        'title': 'Pencari Ilmu',
+        'description': 'Hadiri atau tonton ceramah Islam',
         'xp_reward': 30,
       },
       {
-        'title': 'Family Bond',
-        'description': 'Break fast with family or friends',
+        'title': 'Ikatan Keluarga',
+        'description': 'Berbuka puasa bersama keluarga atau teman',
         'xp_reward': 20,
       },
       {
-        'title': 'Patience Practice',
-        'description': 'Control anger and speak kindly all day',
+        'title': 'Latihan Kesabaran',
+        'description': 'Kendalikan amarah dan berbicara baik sepanjang hari',
         'xp_reward': 35,
       },
     ];

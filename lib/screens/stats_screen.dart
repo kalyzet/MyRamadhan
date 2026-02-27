@@ -22,7 +22,7 @@ class StatsScreen extends StatelessWidget {
         if (appState.activeSession == null) {
           return const Center(
             child: Text(
-              'No active session. Please create a new Ramadhan session.',
+              'Tidak ada sesi aktif. Silakan buat sesi Ramadhan baru.',
               style: TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -35,7 +35,7 @@ class StatsScreen extends StatelessWidget {
         if (stats == null) {
           return const Center(
             child: Text(
-              'No statistics available.',
+              'Tidak ada statistik tersedia.',
               style: TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -95,7 +95,7 @@ class StatsScreen extends StatelessWidget {
       child: Column(
         children: [
           const Text(
-            'Current Level',
+            'Level Saat Ini',
             style: TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -146,7 +146,7 @@ class StatsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '$xpInCurrentLevel / $xpRequiredForNextLevel XP to Level ${currentLevel + 1}',
+            '$xpInCurrentLevel / $xpRequiredForNextLevel XP ke Level ${currentLevel + 1}',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 12,
@@ -172,7 +172,7 @@ class StatsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Current Streaks',
+            'Streak Saat Ini',
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -185,21 +185,21 @@ class StatsScreen extends StatelessWidget {
             children: [
               _buildStreakItem(
                 '🔥',
-                'Perfect',
+                'Sempurna',
                 stats.currentStreak,
-                'days',
+                'hari',
               ),
               _buildStreakItem(
                 '🤲',
-                'Prayer',
+                'Sholat',
                 stats.prayerStreak,
-                'days',
+                'hari',
               ),
               _buildStreakItem(
                 '📖',
                 'Tilawah',
                 stats.tilawahStreak,
-                'days',
+                'hari',
               ),
             ],
           ),
@@ -222,7 +222,7 @@ class StatsScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 12),
                     Text(
-                      'Longest Streak',
+                      'Streak Terpanjang',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -232,7 +232,7 @@ class StatsScreen extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '${stats.longestStreak} days',
+                  '${stats.longestStreak} hari',
                   style: const TextStyle(
                     color: Color(0xFFD97706),
                     fontSize: 20,
@@ -317,7 +317,7 @@ class StatsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Statistics Summary',
+                'Ringkasan Statistik',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -327,21 +327,21 @@ class StatsScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildStatRow(
                 Icons.menu_book,
-                'Total Tilawah Pages',
+                'Total Halaman Tilawah',
                 '$totalTilawahPages',
                 const Color(0xFF10B981),
               ),
               const SizedBox(height: 16),
               _buildStatRow(
                 Icons.check_circle,
-                'Consistency',
+                'Konsistensi',
                 '${consistencyPercentage.toStringAsFixed(1)}%',
                 const Color(0xFFD97706),
               ),
               const SizedBox(height: 16),
               _buildStatRow(
                 Icons.calendar_today,
-                'Days Completed',
+                'Hari Selesai',
                 '$completedDays / $totalDays',
                 const Color(0xFF10B981),
               ),
@@ -400,7 +400,7 @@ class StatsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Daily History',
+            'Riwayat Harian',
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
