@@ -446,7 +446,7 @@ class ProfileScreen extends StatelessWidget {
               'icon/creator.png',
               width: 120,
               height: 120,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 // Fallback if image fails to load
                 return Container(

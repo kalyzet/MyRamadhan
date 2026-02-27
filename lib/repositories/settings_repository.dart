@@ -74,21 +74,21 @@ class SettingsRepository {
     }
   }
 
-  /// Initialize default settings with Indonesian as default language
-  /// Creates a new settings record with 'id' as the language code
+  /// Initialize default settings with English as default language
+  /// Creates a new settings record with 'en' as the language code
   Future<AppSettings> initializeSettings() async {
     try {
       final db = await _dbHelper.database;
 
       final now = DateTime.now();
       final id = await db.insert('app_settings', {
-        'language_code': 'id',
+        'language_code': 'en',
         'updated_at': now.toIso8601String(),
       });
 
       return AppSettings(
         id: id,
-        languageCode: 'id',
+        languageCode: 'en',
         updatedAt: now,
       );
     } catch (e) {

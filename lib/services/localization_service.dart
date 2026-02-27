@@ -5,7 +5,7 @@ import '../repositories/settings_repository.dart';
 /// Service for managing application localization
 /// Loads and provides translations for UI text
 class LocalizationService {
-  String _currentLanguage = 'id';
+  String _currentLanguage = 'en';
   Map<String, dynamic> _translations = {};
   final SettingsRepository _settingsRepository;
 
@@ -27,13 +27,13 @@ class LocalizationService {
       _translations = json.decode(jsonString) as Map<String, dynamic>;
       _currentLanguage = languageCode;
     } catch (e) {
-      // If loading fails, fall back to Indonesian
-      if (languageCode != 'id') {
-        await loadLanguage('id');
+      // If loading fails, fall back to English
+      if (languageCode != 'en') {
+        await loadLanguage('en');
       } else {
-        // If even Indonesian fails, use empty translations
+        // If even English fails, use empty translations
         _translations = {};
-        _currentLanguage = 'id';
+        _currentLanguage = 'en';
       }
     }
   }
@@ -85,7 +85,7 @@ class LocalizationService {
   }
 
   /// Initialize localization service with saved language preference
-  /// Loads the language from settings or defaults to Indonesian
+  /// Loads the language from settings or defaults to English
   Future<void> initialize() async {
     try {
       // Get saved settings
@@ -94,8 +94,8 @@ class LocalizationService {
       // Load the saved language
       await loadLanguage(settings.languageCode);
     } catch (e) {
-      // If initialization fails, default to Indonesian
-      await loadLanguage('id');
+      // If initialization fails, default to English
+      await loadLanguage('en');
     }
   }
 }
