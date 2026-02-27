@@ -127,18 +127,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Color(0xFF10B981),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    localization.translate('home.no_session_title'),
-                    style: const TextStyle(
+                  const Text(
+                    'Tidak Ada Sesi Aktif',
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    localization.translate('home.no_session_message'),
-                    style: const TextStyle(color: Colors.white70),
+                  const Text(
+                    'Buat sesi Ramadhan baru untuk mulai melacak ibadah Anda',
+                    style: TextStyle(color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     icon: const Icon(Icons.add),
-                    label: Text(localization.translate('home.create_session_button')),
+                    label: const Text('Buat Sesi Baru'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           const Text(
-            'Ramadhan Day',
+            'Hari Ramadhan',
             style: TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Text(
-            'of $totalDays',
+            'dari $totalDays',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -322,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '$xpInCurrentLevel / $xpRequiredForNextLevel XP to Level ${currentLevel + 1}',
+            '$xpInCurrentLevel / $xpRequiredForNextLevel XP ke Level ${currentLevel + 1}',
             style: const TextStyle(
               color: Colors.white60,
               fontSize: 12,
@@ -345,12 +345,12 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildStreakItem(
             '🔥',
-            'Perfect',
+            'Sempurna',
             stats.currentStreak,
           ),
           _buildStreakItem(
             '🤲',
-            'Prayer',
+            'Sholat',
             stats.prayerStreak,
           ),
           _buildStreakItem(
@@ -405,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Daily Checklist',
+            'Checklist Harian',
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -416,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Prayer section
           const Text(
-            'Prayers',
+            'Sholat',
             style: TextStyle(
               color: Color(0xFF10B981),
               fontSize: 16,
@@ -429,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Other ibadah
           const Text(
-            'Other Ibadah',
+            'Ibadah Lainnya',
             style: TextStyle(
               color: Color(0xFF10B981),
               fontSize: 16,
@@ -454,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Fajr',
+          'Subuh',
           todayRecord?.fajrComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'fajr', value),
         ),
@@ -462,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Dhuhr',
+          'Dzuhur',
           todayRecord?.dhuhrComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'dhuhr', value),
         ),
@@ -470,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Asr',
+          'Ashar',
           todayRecord?.asrComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'asr', value),
         ),
@@ -486,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Isha',
+          'Isya',
           todayRecord?.ishaComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'isha', value),
         ),
@@ -554,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 12),
         const Expanded(
           child: Text(
-            'Tilawah (Pages)',
+            'Tilawah (Halaman)',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -616,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(width: 12),
         const Expanded(
           child: Text(
-            'Sedekah (Amount)',
+            'Sedekah (Jumlah)',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -673,7 +673,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (pages == null || pages < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid number of pages (0 or more)'),
+          content: Text('Masukkan jumlah halaman yang valid (0 atau lebih)'),
           backgroundColor: Colors.red,
         ),
       );
@@ -684,7 +684,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (pages > 604) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Maximum pages in Quran is 604'),
+          content: Text('Maksimal halaman dalam Al-Quran adalah 604'),
           backgroundColor: Colors.red,
         ),
       );
@@ -731,7 +731,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (amount == null || amount < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid amount (0 or more)'),
+          content: Text('Masukkan jumlah yang valid (0 atau lebih)'),
           backgroundColor: Colors.red,
         ),
       );
@@ -907,7 +907,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(width: 8),
               Text(
-                'Side Quests',
+                'Misi Sampingan',
                 style: TextStyle(
                   color: Color(0xFFD97706),
                   fontSize: 18,
