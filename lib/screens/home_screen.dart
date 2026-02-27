@@ -100,6 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        final localization = appState.localizationService;
+        
         // Show error message if present
         if (appState.errorMessage != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -125,18 +127,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Color(0xFF10B981),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'No Active Session',
-                    style: TextStyle(
+                  Text(
+                    localization.translate('home.no_session_title'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Create a new Ramadhan session to start tracking your spiritual journey.',
-                    style: TextStyle(color: Colors.white70),
+                  Text(
+                    localization.translate('home.no_session_message'),
+                    style: const TextStyle(color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -153,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     icon: const Icon(Icons.add),
-                    label: const Text('Create New Session'),
+                    label: Text(localization.translate('home.create_session_button')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
