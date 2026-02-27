@@ -83,17 +83,24 @@ class StatsRepository {
     // Add XP
     final newTotalXp = stats.totalXp + xpAmount;
     
-    // Calculate new level (level = sqrt(totalXp / 100))
-    // Using the formula: required XP = level * level * 100
-    // So level = sqrt(totalXp / 100)
-    var newLevel = stats.level;
-    while (newLevel * newLevel * 100 <= newTotalXp) {
-      newLevel++;
+    // Calculate new level using cumulative XP formula
+    // Total XP required to reach level n = sum of (i * i * 100) for i from 1 to n-1
+    // We find the highest level where cumulative XP <= newTotalXp
+    var newLevel = 1;
+    var cumulativeXp = 0;
+    
+    // Keep incrementing level while we have enough XP for the next level
+    while (true) {
+      // XP required to go from level newLevel to newLevel+1
+      final xpForNextLevel = newLevel * newLevel * 100;
+      
+      if (cumulativeXp + xpForNextLevel <= newTotalXp) {
+        cumulativeXp += xpForNextLevel;
+        newLevel++;
+      } else {
+        break;
+      }
     }
-    newLevel--; // Go back one since we went one too far
-
-    // Ensure level is at least 1
-    if (newLevel < 1) newLevel = 1;
 
     // Update stats
     final updatedStats = stats.copyWith(
