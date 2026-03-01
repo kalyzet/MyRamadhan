@@ -6,9 +6,12 @@ import 'package:my_ramadhan/database/database_helper.dart';
 import 'package:my_ramadhan/repositories/session_repository.dart';
 import 'package:my_ramadhan/repositories/stats_repository.dart';
 import 'package:my_ramadhan/repositories/daily_record_repository.dart';
+import 'package:my_ramadhan/repositories/settings_repository.dart';
 import 'package:my_ramadhan/models/ramadhan_session.dart';
 import 'package:my_ramadhan/models/user_stats.dart';
 import 'package:my_ramadhan/models/daily_record.dart';
+import 'package:my_ramadhan/services/localization_service.dart';
+import 'package:my_ramadhan/providers/app_state.dart';
 
 void main() {
   // Initialize FFI for testing
@@ -139,6 +142,137 @@ void main() {
         expect(actualCompletionRate, equals(expectedRate),
             reason: 'Completion rate should be calculable for session ${created.year}');
       }
+    });
+
+    // **Feature: language-switcher, Property 2: Language change updates all UI text**
+    // **Validates: Requirements 1.2, 1.3, 2.1, 2.2, 2.3**
+    test(
+        'Property 2: For any valid language code, when the language is changed, AppState notifies listeners to trigger UI rebuild',
+        () async {
+      const iterations = 100;
+      final languageCodes = ['en', 'id'];
+
+      for (int i = 0; i < iterations; i++) {
+        // Alternate between language codes
+        final languageCode = languageCodes[i % languageCodes.length];
+
+        // Create fresh instances for each iteration
+        final settingsRepo = SettingsRepository(dbHelper: dbHelper);
+        final localizationService = LocalizationService(
+          settingsRepository: settingsRepo,
+        );
+        
+        // Initialize with default language
+        await localizationService.initialize();
+
+        final appState = AppState(
+          sessionRepository: sessionRepository,
+          dailyRecordRepository: dailyRecordRepository,
+          statsRepository: statsRepository,
+          localizationService: localizationService,
+        );
+
+        // Wait for initialization to complete
+        await Future.delayed(Duration(milliseconds: 10));
+
+        // Track if notifyListeners was called AFTER initialization
+        var listenerCallCount = 0;
+        appState.addListener(() {
+          listenerCallCount++;
+        });
+
+        // Get initial language
+        final initialLanguage = appState.currentLanguage;
+
+        // Change language
+        await appState.changeLanguage(languageCode);
+
+        // Verify language was updated in AppState
+        expect(appState.currentLanguage, equals(languageCode),
+            reason: 'Iteration $i: AppState currentLanguage should be updated to $languageCode');
+
+        // Verify notifyListeners was called (triggers UI rebuild)
+        expect(listenerCallCount, greaterThan(0),
+            reason: 'Iteration $i: notifyListeners should be called at least once to trigger UI rebuild');
+
+        // Verify translations are available
+        final testKey = 'app_name';
+        final translation = appState.localizationService.translate(testKey);
+        expect(translation, isNotEmpty,
+            reason: 'Iteration $i: Translations should be available');
+
+        // Test that changing to the same language still works
+        listenerCallCount = 0;
+        await appState.changeLanguage(languageCode);
+        expect(listenerCallCount, greaterThan(0),
+            reason: 'Iteration $i: notifyListeners should be called even when changing to same language');
+      }
+    });
+
+    test('ProfileScreen language switcher displays current language correctly',
+        () async {
+      // Create AppState with localization service
+      final settingsRepo = SettingsRepository(dbHelper: dbHelper);
+      final localizationService = LocalizationService(
+        settingsRepository: settingsRepo,
+      );
+      await localizationService.initialize();
+
+      final appState = AppState(
+        sessionRepository: sessionRepository,
+        dailyRecordRepository: dailyRecordRepository,
+        statsRepository: statsRepository,
+        localizationService: localizationService,
+      );
+
+      // Wait for initialization
+      await Future.delayed(Duration(milliseconds: 10));
+
+      // Verify initial language is 'id' (default)
+      expect(appState.currentLanguage, equals('id'),
+          reason: 'Default language should be Indonesian');
+
+      // Change to English
+      await appState.changeLanguage('en');
+      expect(appState.currentLanguage, equals('en'),
+          reason: 'Language should be updated to English');
+
+      // Change back to Indonesian
+      await appState.changeLanguage('id');
+      expect(appState.currentLanguage, equals('id'),
+          reason: 'Language should be updated back to Indonesian');
+    });
+
+    test('ProfileScreen language switcher handles errors gracefully', () async {
+      // Create AppState with localization service
+      final settingsRepo = SettingsRepository(dbHelper: dbHelper);
+      final localizationService = LocalizationService(
+        settingsRepository: settingsRepo,
+      );
+      await localizationService.initialize();
+
+      final appState = AppState(
+        sessionRepository: sessionRepository,
+        dailyRecordRepository: dailyRecordRepository,
+        statsRepository: statsRepository,
+        localizationService: localizationService,
+      );
+
+      // Wait for initialization
+      await Future.delayed(Duration(milliseconds: 10));
+
+      // Try to change to invalid language code
+      try {
+        await appState.changeLanguage('invalid');
+        fail('Should throw ArgumentError for invalid language code');
+      } catch (e) {
+        expect(e, isA<ArgumentError>(),
+            reason: 'Should throw ArgumentError for invalid language code');
+      }
+
+      // Verify language remains unchanged after error
+      expect(appState.currentLanguage, equals('id'),
+          reason: 'Language should remain unchanged after error');
     });
   });
 }

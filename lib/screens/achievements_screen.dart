@@ -14,15 +14,17 @@ class AchievementsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        final t = appState.localizationService.translate;
+        
         if (appState.isLoading) {
           return const AchievementsScreenSkeleton();
         }
 
         if (appState.activeSession == null) {
-          return const Center(
+          return Center(
             child: Text(
-              'Tidak ada sesi aktif. Silakan buat sesi Ramadhan baru.',
-              style: TextStyle(color: Colors.white70),
+              t('achievements.no_session'),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           );
@@ -31,10 +33,10 @@ class AchievementsScreen extends StatelessWidget {
         final achievements = appState.achievements;
 
         if (achievements.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
-              'Tidak ada pencapaian tersedia.',
-              style: TextStyle(color: Colors.white70),
+              t('achievements.no_achievements'),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           );
@@ -52,14 +54,14 @@ class AchievementsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Header with progress
-              _buildHeader(unlockedAchievements.length, achievements.length),
+              _buildHeader(context, unlockedAchievements.length, achievements.length),
               const SizedBox(height: 24),
 
               // Unlocked achievements section
               if (unlockedAchievements.isNotEmpty) ...[
-                const Text(
-                  'Terbuka',
-                  style: TextStyle(
+                Text(
+                  t('achievements.unlocked'),
+                  style: const TextStyle(
                     color: Color(0xFFD97706), // Gold
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -72,9 +74,9 @@ class AchievementsScreen extends StatelessWidget {
 
               // Locked achievements section
               if (lockedAchievements.isNotEmpty) ...[
-                const Text(
-                  'Terkunci',
-                  style: TextStyle(
+                Text(
+                  t('achievements.locked'),
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -90,7 +92,9 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(int unlocked, int total) {
+  Widget _buildHeader(BuildContext context, int unlocked, int total) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
     final progress = total > 0 ? unlocked / total : 0.0;
 
     return Container(
@@ -105,18 +109,18 @@ class AchievementsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.emoji_events,
                 color: Colors.white,
                 size: 32,
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(
-                'Pencapaian',
-                style: TextStyle(
+                t('achievements.title'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -126,7 +130,7 @@ class AchievementsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '$unlocked / $total Terbuka',
+            '$unlocked / $total ${t('achievements.unlocked')}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -145,7 +149,7 @@ class AchievementsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${(progress * 100).toStringAsFixed(0)}% Selesai',
+            '${(progress * 100).toStringAsFixed(0)}% ${t('achievements.complete')}',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,

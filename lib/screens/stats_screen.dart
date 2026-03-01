@@ -15,15 +15,17 @@ class StatsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        final t = appState.localizationService.translate;
+        
         if (appState.isLoading) {
           return const StatsScreenSkeleton();
         }
 
         if (appState.activeSession == null) {
-          return const Center(
+          return Center(
             child: Text(
-              'Tidak ada sesi aktif. Silakan buat sesi Ramadhan baru.',
-              style: TextStyle(color: Colors.white70),
+              t('stats.no_session'),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           );
@@ -33,10 +35,10 @@ class StatsScreen extends StatelessWidget {
         final stats = appState.currentStats;
 
         if (stats == null) {
-          return const Center(
+          return Center(
             child: Text(
-              'Tidak ada statistik tersedia.',
-              style: TextStyle(color: Colors.white70),
+              t('stats.no_stats'),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           );
@@ -48,19 +50,19 @@ class StatsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Total XP and Level
-              _buildXpLevelCard(stats),
+              _buildXpLevelCard(context, stats),
               const SizedBox(height: 16),
 
               // Streak Information
-              _buildStreaksCard(stats),
+              _buildStreaksCard(context, stats),
               const SizedBox(height: 16),
 
               // Statistics Summary
-              _buildStatsSummaryCard(session, stats),
+              _buildStatsSummaryCard(context, session, stats),
               const SizedBox(height: 16),
 
               // Daily History Calendar
-              _buildDailyHistorySection(session),
+              _buildDailyHistorySection(context, session),
             ],
           ),
         );
@@ -68,7 +70,10 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildXpLevelCard(stats) {
+  Widget _buildXpLevelCard(BuildContext context, stats) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     final currentLevel = stats.level;
     final totalXp = stats.totalXp;
 
@@ -94,9 +99,9 @@ class StatsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text(
-            'Level Saat Ini',
-            style: TextStyle(
+          Text(
+            t('stats.current_level'),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -115,9 +120,9 @@ class StatsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Total XP',
-                style: TextStyle(
+              Text(
+                t('stats.total_xp'),
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
                 ),
@@ -146,7 +151,7 @@ class StatsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '$xpInCurrentLevel / $xpRequiredForNextLevel XP ke Level ${currentLevel + 1}',
+            '$xpInCurrentLevel / $xpRequiredForNextLevel ${t('home.to_level')} ${currentLevel + 1}',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 12,
@@ -157,7 +162,10 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStreaksCard(stats) {
+  Widget _buildStreaksCard(BuildContext context, stats) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -171,9 +179,9 @@ class StatsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Streak Saat Ini',
-            style: TextStyle(
+          Text(
+            t('stats.current_streaks'),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -185,21 +193,21 @@ class StatsScreen extends StatelessWidget {
             children: [
               _buildStreakItem(
                 '🔥',
-                'Sempurna',
+                t('stats.perfect'),
                 stats.currentStreak,
-                'hari',
+                t('stats.days'),
               ),
               _buildStreakItem(
                 '🤲',
-                'Sholat',
+                t('stats.prayer'),
                 stats.prayerStreak,
-                'hari',
+                t('stats.days'),
               ),
               _buildStreakItem(
                 '📖',
-                'Tilawah',
+                t('stats.tilawah'),
                 stats.tilawahStreak,
-                'hari',
+                t('stats.days'),
               ),
             ],
           ),
@@ -213,17 +221,17 @@ class StatsScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.emoji_events,
                       color: Color(0xFFD97706),
                       size: 24,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Text(
-                      'Streak Terpanjang',
-                      style: TextStyle(
+                      t('stats.longest_streak'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -232,7 +240,7 @@ class StatsScreen extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '${stats.longestStreak} hari',
+                  '${stats.longestStreak} ${t('stats.days')}',
                   style: const TextStyle(
                     color: Color(0xFFD97706),
                     fontSize: 20,
@@ -282,7 +290,10 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSummaryCard(session, stats) {
+  Widget _buildStatsSummaryCard(BuildContext context, session, stats) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return FutureBuilder<Map<String, dynamic>>(
       future: _calculateStatsSummary(session.id!),
       builder: (context, snapshot) {
@@ -316,9 +327,9 @@ class StatsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Ringkasan Statistik',
-                style: TextStyle(
+              Text(
+                t('stats.statistics_summary'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -327,21 +338,21 @@ class StatsScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _buildStatRow(
                 Icons.menu_book,
-                'Total Halaman Tilawah',
+                t('stats.total_tilawah_pages'),
                 '$totalTilawahPages',
                 const Color(0xFF10B981),
               ),
               const SizedBox(height: 16),
               _buildStatRow(
                 Icons.check_circle,
-                'Konsistensi',
+                t('stats.consistency'),
                 '${consistencyPercentage.toStringAsFixed(1)}%',
                 const Color(0xFFD97706),
               ),
               const SizedBox(height: 16),
               _buildStatRow(
                 Icons.calendar_today,
-                'Hari Selesai',
+                t('stats.days_completed'),
                 '$completedDays / $totalDays',
                 const Color(0xFF10B981),
               ),
@@ -389,7 +400,10 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDailyHistorySection(session) {
+  Widget _buildDailyHistorySection(BuildContext context, session) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -399,9 +413,9 @@ class StatsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Riwayat Harian',
-            style: TextStyle(
+          Text(
+            t('stats.daily_history'),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,

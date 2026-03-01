@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildContent(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
-        final localization = appState.localizationService;
+        final t = appState.localizationService.translate;
         
         // Show error message if present
         if (appState.errorMessage != null) {
@@ -127,18 +127,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Color(0xFF10B981),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Tidak Ada Sesi Aktif',
-                    style: TextStyle(
+                  Text(
+                    t('home.no_session_title'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Buat sesi Ramadhan baru untuk mulai melacak ibadah Anda',
-                    style: TextStyle(color: Colors.white70),
+                  Text(
+                    t('home.no_session_message'),
+                    style: const TextStyle(color: Colors.white70),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     icon: const Icon(Icons.add),
-                    label: const Text('Buat Sesi Baru'),
+                    label: Text(t('home.create_session_button')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
@@ -194,15 +194,15 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
 
               // Ramadhan day indicator
-              _buildDayIndicator(currentDay, session.totalDays),
+              _buildDayIndicator(context, currentDay, session.totalDays),
               const SizedBox(height: 24),
 
               // XP bar with level and progress
-              if (stats != null) _buildXpBar(stats),
+              if (stats != null) _buildXpBar(context, stats),
               const SizedBox(height: 24),
 
               // Current streak information
-              if (stats != null) _buildStreakInfo(stats),
+              if (stats != null) _buildStreakInfo(context, stats),
               const SizedBox(height: 24),
 
               // Daily checklist
@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               // Today's side quests
-              if (sideQuests.isNotEmpty) _buildSideQuests(sideQuests),
+              if (sideQuests.isNotEmpty) _buildSideQuests(context, sideQuests),
             ],
           ),
         );
@@ -219,7 +219,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-  Widget _buildDayIndicator(int currentDay, int totalDays) {
+  Widget _buildDayIndicator(BuildContext context, int currentDay, int totalDays) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -232,9 +235,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         children: [
-          const Text(
-            'Hari Ramadhan',
-            style: TextStyle(
+          Text(
+            t('home.ramadhan_day'),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -250,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Text(
-            'dari $totalDays',
+            '${t('home.of')} $totalDays',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -261,7 +264,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildXpBar(stats) {
+  Widget _buildXpBar(BuildContext context, stats) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     final currentLevel = stats.level;
     final totalXp = stats.totalXp;
     
@@ -292,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Level $currentLevel',
+                '${t('home.level')} $currentLevel',
                 style: const TextStyle(
                   color: Color(0xFFD97706), // Gold
                   fontSize: 20,
@@ -300,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Text(
-                '$totalXp XP',
+                '$totalXp ${t('home.xp')}',
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 16,
@@ -322,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '$xpInCurrentLevel / $xpRequiredForNextLevel XP ke Level ${currentLevel + 1}',
+            '$xpInCurrentLevel / $xpRequiredForNextLevel ${t('home.to_level')} ${currentLevel + 1}',
             style: const TextStyle(
               color: Colors.white60,
               fontSize: 12,
@@ -333,7 +339,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStreakInfo(stats) {
+  Widget _buildStreakInfo(BuildContext context, stats) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -345,17 +354,17 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _buildStreakItem(
             '🔥',
-            'Sempurna',
+            t('home.perfect'),
             stats.currentStreak,
           ),
           _buildStreakItem(
             '🤲',
-            'Sholat',
+            t('home.prayer'),
             stats.prayerStreak,
           ),
           _buildStreakItem(
             '📖',
-            'Tilawah',
+            t('home.tilawah_streak'),
             stats.tilawahStreak,
           ),
         ],
@@ -395,6 +404,8 @@ class _HomeScreenState extends State<HomeScreen> {
     AppState appState,
     DailyRecord? todayRecord,
   ) {
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -404,9 +415,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Checklist Harian',
-            style: TextStyle(
+          Text(
+            t('home.daily_checklist'),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -415,9 +426,9 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 16),
 
           // Prayer section
-          const Text(
-            'Sholat',
-            style: TextStyle(
+          Text(
+            t('home.prayers'),
+            style: const TextStyle(
               color: Color(0xFF10B981),
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -428,9 +439,9 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 16),
 
           // Other ibadah
-          const Text(
-            'Ibadah Lainnya',
-            style: TextStyle(
+          Text(
+            t('home.other_ibadah'),
+            style: const TextStyle(
               color: Color(0xFF10B981),
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -448,13 +459,15 @@ class _HomeScreenState extends State<HomeScreen> {
     AppState appState,
     DailyRecord? todayRecord,
   ) {
+    final t = appState.localizationService.translate;
+    
     return Column(
       children: [
         _buildCheckboxTile(
           context,
           appState,
           todayRecord,
-          'Subuh',
+          t('home.fajr'),
           todayRecord?.fajrComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'fajr', value),
         ),
@@ -462,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Dzuhur',
+          t('home.dhuhr'),
           todayRecord?.dhuhrComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'dhuhr', value),
         ),
@@ -470,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Ashar',
+          t('home.asr'),
           todayRecord?.asrComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'asr', value),
         ),
@@ -478,7 +491,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Maghrib',
+          t('home.maghrib'),
           todayRecord?.maghribComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'maghrib', value),
         ),
@@ -486,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Isya',
+          t('home.isha'),
           todayRecord?.ishaComplete ?? false,
           (value) => _updatePrayer(context, appState, todayRecord, 'isha', value),
         ),
@@ -499,13 +512,15 @@ class _HomeScreenState extends State<HomeScreen> {
     AppState appState,
     DailyRecord? todayRecord,
   ) {
+    final t = appState.localizationService.translate;
+    
     return Column(
       children: [
         _buildCheckboxTile(
           context,
           appState,
           todayRecord,
-          'Puasa (Fasting)',
+          t('home.puasa'),
           todayRecord?.puasaComplete ?? false,
           (value) => _updateOtherIbadah(context, appState, todayRecord, 'puasa', value),
         ),
@@ -513,7 +528,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Tarawih',
+          t('home.tarawih'),
           todayRecord?.tarawihComplete ?? false,
           (value) => _updateOtherIbadah(context, appState, todayRecord, 'tarawih', value),
         ),
@@ -521,7 +536,7 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           appState,
           todayRecord,
-          'Dzikir',
+          t('home.dzikir'),
           todayRecord?.dzikirComplete ?? false,
           (value) => _updateOtherIbadah(context, appState, todayRecord, 'dzikir', value),
         ),
@@ -540,6 +555,7 @@ class _HomeScreenState extends State<HomeScreen> {
     AppState appState,
     DailyRecord? todayRecord,
   ) {
+    final t = appState.localizationService.translate;
     final controller = TextEditingController(
       text: todayRecord?.tilawahPages.toString() ?? '0',
     );
@@ -552,10 +568,10 @@ class _HomeScreenState extends State<HomeScreen> {
           size: 20,
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Text(
-            'Tilawah (Halaman)',
-            style: TextStyle(
+            t('home.tilawah'),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
             ),
@@ -602,6 +618,7 @@ class _HomeScreenState extends State<HomeScreen> {
     AppState appState,
     DailyRecord? todayRecord,
   ) {
+    final t = appState.localizationService.translate;
     final controller = TextEditingController(
       text: todayRecord?.sedekahAmount.toString() ?? '0',
     );
@@ -614,10 +631,10 @@ class _HomeScreenState extends State<HomeScreen> {
           size: 20,
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Text(
-            'Sedekah (Jumlah)',
-            style: TextStyle(
+            t('home.sedekah'),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
             ),
@@ -665,6 +682,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DailyRecord? todayRecord,
     String value,
   ) {
+    final t = appState.localizationService.translate;
     final session = appState.activeSession;
     if (session == null) return;
 
@@ -672,8 +690,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final pages = int.tryParse(value);
     if (pages == null || pages < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masukkan jumlah halaman yang valid (0 atau lebih)'),
+        SnackBar(
+          content: Text(t('home.invalid_pages')),
           backgroundColor: Colors.red,
         ),
       );
@@ -683,8 +701,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // Maximum pages in Quran is 604
     if (pages > 604) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Maksimal halaman dalam Al-Quran adalah 604'),
+        SnackBar(
+          content: Text(t('home.max_pages')),
           backgroundColor: Colors.red,
         ),
       );
@@ -723,6 +741,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DailyRecord? todayRecord,
     String value,
   ) {
+    final t = appState.localizationService.translate;
     final session = appState.activeSession;
     if (session == null) return;
 
@@ -730,8 +749,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final amount = double.tryParse(value);
     if (amount == null || amount < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masukkan jumlah yang valid (0 atau lebih)'),
+        SnackBar(
+          content: Text(t('home.invalid_amount')),
           backgroundColor: Colors.red,
         ),
       );
@@ -885,7 +904,10 @@ class _HomeScreenState extends State<HomeScreen> {
     appState.updateDailyRecord(updatedRecord);
   }
 
-  Widget _buildSideQuests(List sideQuests) {
+  Widget _buildSideQuests(BuildContext context, List sideQuests) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -899,16 +921,16 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Text(
+              const Text(
                 '⭐',
                 style: TextStyle(fontSize: 20),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'Misi Sampingan',
-                style: TextStyle(
+                t('home.side_quests'),
+                style: const TextStyle(
                   color: Color(0xFFD97706),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -926,6 +948,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSideQuestTile(quest) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        final t = appState.localizationService.translate;
+        
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: InkWell(
@@ -941,7 +965,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              '${quest.title} completed! +${quest.xpReward} XP',
+                              '${quest.title} ${t('home.quest_completed')} +${quest.xpReward} ${t('home.xp')}',
                             ),
                             backgroundColor: const Color(0xFF10B981),
                             duration: const Duration(seconds: 2),
@@ -952,7 +976,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Error completing quest: $e'),
+                            content: Text('${t('home.error_completing_quest')} $e'),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -1002,7 +1026,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    '+${quest.xpReward} XP',
+                    '+${quest.xpReward} ${t('home.xp')}',
                     style: const TextStyle(
                       color: Color(0xFFD97706),
                       fontSize: 12,
