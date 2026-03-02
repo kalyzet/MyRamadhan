@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/localization_service.dart';
+import '../providers/app_state.dart';
 
 class RealTimeClockWidget extends StatefulWidget {
   final bool showDate;
@@ -7,6 +10,7 @@ class RealTimeClockWidget extends StatefulWidget {
   final TextStyle? timeStyle;
   final TextStyle? dateStyle;
   final DateTime Function()? getCurrentTime; // Injectable for testing
+  final LocalizationService? localizationService; // Injectable for testing
 
   const RealTimeClockWidget({
     Key? key,
@@ -15,6 +19,7 @@ class RealTimeClockWidget extends StatefulWidget {
     this.timeStyle,
     this.dateStyle,
     this.getCurrentTime,
+    this.localizationService,
   }) : super(key: key);
 
   @override
@@ -24,31 +29,6 @@ class RealTimeClockWidget extends StatefulWidget {
 class _RealTimeClockWidgetState extends State<RealTimeClockWidget> {
   late Timer _timer;
   late DateTime _currentTime;
-
-  static const List<String> _indonesianDays = [
-    'Senin',
-    'Selasa',
-    'Rabu',
-    'Kamis',
-    'Jumat',
-    'Sabtu',
-    'Minggu',
-  ];
-
-  static const List<String> _indonesianMonths = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
 
   @override
   void initState() {
@@ -80,11 +60,41 @@ class _RealTimeClockWidgetState extends State<RealTimeClockWidget> {
     return '$hour:$minute:$second';
   }
 
-  String _formatDate() {
-    final dayName = _indonesianDays[_currentTime.weekday - 1];
+  String _formatDate(LocalizationService localizationService) {
+    final t = localizationService.translate;
+    
+    // Map weekday numbers to translation keys
+    final dayKeys = [
+      'date.days.monday',    // 1
+      'date.days.tuesday',   // 2
+      'date.days.wednesday', // 3
+      'date.days.thursday',  // 4
+      'date.days.friday',    // 5
+      'date.days.saturday',  // 6
+      'date.days.sunday',    // 7
+    ];
+    
+    // Map month numbers to translation keys
+    final monthKeys = [
+      'date.months.january',   // 1
+      'date.months.february',  // 2
+      'date.months.march',     // 3
+      'date.months.april',     // 4
+      'date.months.may',       // 5
+      'date.months.june',      // 6
+      'date.months.july',      // 7
+      'date.months.august',    // 8
+      'date.months.september', // 9
+      'date.months.october',   // 10
+      'date.months.november',  // 11
+      'date.months.december',  // 12
+    ];
+    
+    final dayName = t(dayKeys[_currentTime.weekday - 1]);
     final day = _currentTime.day.toString().padLeft(2, '0');
-    final monthName = _indonesianMonths[_currentTime.month - 1];
+    final monthName = t(monthKeys[_currentTime.month - 1]);
     final year = _currentTime.year;
+    
     return '$dayName, $day $monthName $year';
   }
 
@@ -98,6 +108,20 @@ class _RealTimeClockWidgetState extends State<RealTimeClockWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // If localizationService is provided directly (for testing), use it without Consumer
+    if (widget.localizationService != null) {
+      return _buildWidget(context, widget.localizationService!);
+    }
+    
+    // Otherwise, use Consumer to get localizationService from AppState
+    return Consumer<AppState>(
+      builder: (context, appState, child) {
+        return _buildWidget(context, appState.localizationService);
+      },
+    );
+  }
+
+  Widget _buildWidget(BuildContext context, LocalizationService localizationService) {
     final theme = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -167,8 +191,8 @@ class _RealTimeClockWidgetState extends State<RealTimeClockWidget> {
                   );
                 },
                 child: Text(
-                  _formatDate(),
-                  key: ValueKey<String>(_formatDate()),
+                  _formatDate(localizationService),
+                  key: ValueKey<String>(_formatDate(localizationService)),
                   style: widget.dateStyle ??
                       TextStyle(
                         fontSize: dateFontSize,

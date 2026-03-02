@@ -246,5 +246,30 @@
             "title": "Latihan Kesabaran",
             "description": "Kendalikan amarah dan berbicara baik sepanjang hari"
         }
+    },
+    "date": {
+        "days": {
+            "monday": "Senin",
+            "tuesday": "Selasa",
+            "wednesday": "Rabu",
+            "thursday": "Kamis",
+            "friday": "Jumat",
+            "saturday": "Sabtu",
+            "sunday": "Minggu"
+        },
+        "months": {
+            "january": "Januari",
+            "february": "Februari",
+            "march": "Maret",
+            "april": "April",
+            "may": "Mei",
+            "june": "Juni",
+            "july": "Juli",
+            "august": "Agustus",
+            "september": "September",
+            "october": "Oktober",
+            "november": "November",
+            "december": "Desember"
+        }
     }
 }
