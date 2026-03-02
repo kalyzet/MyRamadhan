@@ -18,15 +18,15 @@
         "asr": "Asr",
         "maghrib": "Maghrib",
         "isha": "Isha",
-        "puasa": "Puasa (Fasting)",
-        "tarawih": "Tarawih",
-        "dzikir": "Dzikir",
-        "tilawah": "Tilawah (Pages)",
-        "sedekah": "Sedekah (Amount)",
+        "puasa": "Fasting",
+        "tarawih": "Tarawih Prayer",
+        "dzikir": "Dhikr",
+        "tilawah": "Qur'an Recitation (Pages)",
+        "sedekah": "Almsgiving (Amount)",
         "side_quests": "Side Quests",
         "perfect": "Perfect",
         "prayer": "Prayer",
-        "tilawah_streak": "Tilawah",
+        "tilawah_streak": "Qur'an Recitation",
         "quest_completed": "completed!",
         "error_completing_quest": "Error completing quest:",
         "invalid_pages": "Please enter a valid number of pages (0 or more)",
@@ -42,11 +42,11 @@
         "current_streaks": "Current Streaks",
         "perfect": "Perfect",
         "prayer": "Prayer",
-        "tilawah": "Tilawah",
+        "tilawah": "Qur'an Recitation",
         "days": "days",
         "longest_streak": "Longest Streak",
         "statistics_summary": "Statistics Summary",
-        "total_tilawah_pages": "Total Tilawah Pages",
+        "total_tilawah_pages": "Total Qur'an Recitation Pages",
         "consistency": "Consistency",
         "days_completed": "Days Completed",
         "daily_history": "Daily History"
@@ -57,7 +57,39 @@
         "locked": "Locked",
         "no_session": "No active session. Please create a new Ramadhan session.",
         "no_achievements": "No achievements available.",
-        "complete": "Complete"
+        "complete": "Complete",
+        "first_day": {
+            "title": "First Day Complete",
+            "description": "Complete your first day of Ramadhan"
+        },
+        "seven_days": {
+            "title": "7-Day Consistency",
+            "description": "Maintain perfect streak for 7 days"
+        },
+        "quran_100": {
+            "title": "100 Qur'an Pages",
+            "description": "Read 100 pages of Qur'an"
+        },
+        "master": {
+            "title": "Ramadhan Master",
+            "description": "Complete all 30 days with perfect record"
+        },
+        "prayer_warrior": {
+            "title": "Prayer Warrior",
+            "description": "Complete all 5 prayers for 15 consecutive days"
+        },
+        "generous": {
+            "title": "Generous Heart",
+            "description": "Give almsgiving for 20 days"
+        },
+        "night_prayer": {
+            "title": "Night Servant",
+            "description": "Complete tarawih prayer for 25 days"
+        },
+        "quran_complete": {
+            "title": "Qur'an Completion",
+            "description": "Read all 604 pages of Qur'an"
+        }
     },
     "profile": {
         "title": "Profile",
@@ -106,7 +138,7 @@
         "total_xp": "Total XP",
         "perfect_streak": "Perfect Streak",
         "prayer_streak": "Prayer Streak",
-        "tilawah_streak": "Tilawah Streak",
+        "tilawah_streak": "Qur'an Recitation Streak",
         "completion_rate": "Completion Rate",
         "days": "days"
     },
@@ -119,10 +151,10 @@
         "ibadah_statistics": "Ibadah Statistics",
         "prayers_completed": "Prayers Completed",
         "fasting_days": "Fasting Days",
-        "tarawih_nights": "Tarawih Nights",
-        "tilawah_pages": "Tilawah Pages",
-        "dzikir_sessions": "Dzikir Sessions",
-        "sedekah_given": "Sedekah Given",
+        "tarawih_nights": "Tarawih Prayer Nights",
+        "tilawah_pages": "Qur'an Recitation Pages",
+        "dzikir_sessions": "Dhikr Sessions",
+        "sedekah_given": "Almsgiving Given",
         "progress_comparison": "Progress Comparison",
         "start": "Start",
         "end": "End",
@@ -179,12 +211,12 @@
             "description": "Pray Fajr within 15 minutes after Adhan"
         },
         "quran_expert": {
-            "title": "Quran Expert",
-            "description": "Read 5 pages of Quran with translation"
+            "title": "Qur'an Expert",
+            "description": "Read 5 pages of Qur'an with translation"
         },
         "generous_soul": {
             "title": "Generous Soul",
-            "description": "Give charity to 3 different people"
+            "description": "Give almsgiving to 3 different people"
         },
         "community_helper": {
             "title": "Community Helper",
@@ -213,40 +245,6 @@
         "patience_training": {
             "title": "Patience Training",
             "description": "Control anger and speak kindly all day"
-        }
-    },
-    "achievements": {
-        "first_day": {
-            "title": "First Day Complete",
-            "description": "Complete your first day of Ramadhan"
-        },
-        "seven_days": {
-            "title": "7-Day Consistency",
-            "description": "Maintain perfect streak for 7 days"
-        },
-        "quran_100": {
-            "title": "100 Quran Pages",
-            "description": "Read 100 pages of Quran"
-        },
-        "master": {
-            "title": "Ramadhan Master",
-            "description": "Complete all 30 days with perfect record"
-        },
-        "prayer_warrior": {
-            "title": "Prayer Warrior",
-            "description": "Complete all 5 prayers for 15 consecutive days"
-        },
-        "generous": {
-            "title": "Generous Heart",
-            "description": "Give charity for 20 days"
-        },
-        "night_prayer": {
-            "title": "Night Servant",
-            "description": "Complete tarawih for 25 days"
-        },
-        "quran_complete": {
-            "title": "Quran Completion",
-            "description": "Read all 604 pages of Quran"
         }
     }
 }
