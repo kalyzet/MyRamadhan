@@ -81,6 +81,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    final t = appState.localizationService.translate;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -130,22 +132,22 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: const Color(0xFF1F2937),
         selectedItemColor: const Color(0xFF10B981), // Emerald
         unselectedItemColor: Colors.white38,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Beranda',
+            label: t('navigation.home'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Statistik',
+            label: t('navigation.stats'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events),
-            label: 'Pencapaian',
+            label: t('navigation.achievements'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profil',
+            label: t('navigation.profile'),
           ),
         ],
       ),

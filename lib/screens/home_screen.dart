@@ -965,7 +965,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              '${quest.title} ${t('home.quest_completed')} +${quest.xpReward} ${t('home.xp')}',
+                              '${t(quest.title)} ${t('home.quest_completed')} +${quest.xpReward} ${t('home.xp')}',
                             ),
                             backgroundColor: const Color(0xFF10B981),
                             duration: const Duration(seconds: 2),
@@ -1003,7 +1003,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          quest.title,
+                          t(quest.title),
                           style: TextStyle(
                             color: quest.completed
                                 ? Colors.white54
@@ -1016,7 +1016,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         if (quest.description.isNotEmpty)
                           Text(
-                            quest.description,
+                            t(quest.description),
                             style: const TextStyle(
                               color: Colors.white38,
                               fontSize: 12,

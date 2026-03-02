@@ -80,6 +80,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
           : null;
 
       final appState = Provider.of<AppState>(context, listen: false);
+      final t = appState.localizationService.translate;
       
       await appState.createNewSession(
         year: year,
@@ -92,17 +93,20 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
         Navigator.of(context).pop(true); // Return true to indicate success
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sesi Ramadhan berhasil dibuat!'),
-            backgroundColor: Color(0xFF10B981),
+          SnackBar(
+            content: Text(t('create_session.success')),
+            backgroundColor: const Color(0xFF10B981),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final appState = Provider.of<AppState>(context, listen: false);
+        final t = appState.localizationService.translate;
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Kesalahan membuat sesi: $e'),
+            content: Text('${t('create_session.error')} $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -118,6 +122,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    final t = appState.localizationService.translate;
+    
     return Dialog(
       backgroundColor: const Color(0xFF1F2937),
       shape: RoundedRectangleBorder(
@@ -133,17 +140,17 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Title
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.add_circle_outline,
                       color: Color(0xFF10B981),
                       size: 28,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Text(
-                      'Buat Sesi Baru',
-                      style: TextStyle(
+                      t('create_session.title'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -159,9 +166,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Tahun',
+                    labelText: t('create_session.year'),
                     labelStyle: const TextStyle(color: Colors.white70),
-                    hintText: 'contoh: 2024',
+                    hintText: t('create_session.year_hint'),
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(
                       Icons.calendar_today,
@@ -188,14 +195,14 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Silakan masukkan tahun';
+                      return t('create_session.year_required');
                     }
                     final year = int.tryParse(value);
                     if (year == null) {
-                      return 'Silakan masukkan tahun yang valid';
+                      return t('create_session.year_invalid');
                     }
                     if (year < 2020 || year > 2100) {
-                      return 'Tahun harus antara 2020 dan 2100';
+                      return t('create_session.year_range');
                     }
                     return null;
                   },
@@ -223,9 +230,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Tanggal Mulai',
-                                style: TextStyle(
+                              Text(
+                                t('create_session.start_date'),
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
                                 ),
@@ -262,17 +269,17 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.timelapse,
                             color: Color(0xFF10B981),
                             size: 20,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
-                            'Durasi',
-                            style: TextStyle(
+                            t('create_session.duration'),
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
                             ),
@@ -283,11 +290,11 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildDurationOption(29),
+                            child: _buildDurationOption(29, t),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildDurationOption(30),
+                            child: _buildDurationOption(30, t),
                           ),
                         ],
                       ),
@@ -315,10 +322,10 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                             size: 20,
                           ),
                           const SizedBox(width: 8),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'Mulai di tengah Ramadhan?',
-                              style: TextStyle(
+                              t('create_session.mid_ramadhan'),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                               ),
@@ -342,9 +349,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           keyboardType: TextInputType.number,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
-                            labelText: 'Nomor Hari Saat Ini',
+                            labelText: t('create_session.current_day_number'),
                             labelStyle: const TextStyle(color: Colors.white70),
-                            hintText: 'contoh: 15',
+                            hintText: t('create_session.current_day_hint'),
                             hintStyle: const TextStyle(color: Colors.white38),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -374,14 +381,14 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                           validator: (value) {
                             if (_isMidRamadhan) {
                               if (value == null || value.isEmpty) {
-                                return 'Silakan masukkan nomor hari saat ini';
+                                return t('create_session.current_day_required');
                               }
                               final day = int.tryParse(value);
                               if (day == null) {
-                                return 'Silakan masukkan nomor yang valid';
+                                return t('create_session.current_day_invalid');
                               }
                               if (day < 1 || day > _duration) {
-                                return 'Hari harus antara 1 dan $_duration';
+                                return '${t('create_session.current_day_range')} $_duration';
                               }
                             }
                             return null;
@@ -408,9 +415,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Batal',
-                          style: TextStyle(
+                        child: Text(
+                          t('create_session.cancel'),
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 16,
                           ),
@@ -439,9 +446,9 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
                                   ),
                                 ),
                               )
-                            : const Text(
-                                'Buat',
-                                style: TextStyle(
+                            : Text(
+                                t('create_session.create'),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -459,7 +466,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
     );
   }
 
-  Widget _buildDurationOption(int days) {
+  Widget _buildDurationOption(int days, Function(String) t) {
     final isSelected = _duration == days;
     
     return InkWell(
@@ -480,7 +487,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
         ),
         child: Center(
           child: Text(
-            '$days Hari',
+            '${days} ${t('create_session.days')}',
             style: TextStyle(
               color: isSelected ? Colors.white : Colors.white70,
               fontSize: 16,

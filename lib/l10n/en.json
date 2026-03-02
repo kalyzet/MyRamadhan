@@ -95,7 +95,9 @@
         "compare_sessions": "Compare Sessions",
         "select_sessions": "Select sessions to compare (2-4)",
         "cancel": "Cancel",
-        "compare": "Compare"
+        "compare": "Compare",
+        "sessions_selected": "sessions selected",
+        "clear": "Clear"
     },
     "comparison": {
         "title": "Session Comparison",
@@ -170,5 +172,81 @@
         "stats": "Stats",
         "achievements": "Achievements",
         "profile": "Profile"
+    },
+    "side_quests": {
+        "early_bird": {
+            "title": "Early Bird",
+            "description": "Pray Fajr within 15 minutes after Adhan"
+        },
+        "quran_expert": {
+            "title": "Quran Expert",
+            "description": "Read 5 pages of Quran with translation"
+        },
+        "generous_soul": {
+            "title": "Generous Soul",
+            "description": "Give charity to 3 different people"
+        },
+        "community_helper": {
+            "title": "Community Helper",
+            "description": "Help prepare iftar for others"
+        },
+        "dhikr_master": {
+            "title": "Dhikr Master",
+            "description": "Say Subhanallah 100 times"
+        },
+        "night_warrior": {
+            "title": "Night Warrior",
+            "description": "Pray Tahajjud before Fajr"
+        },
+        "dua_specialist": {
+            "title": "Dua Specialist",
+            "description": "Pray for 10 different people"
+        },
+        "knowledge_seeker": {
+            "title": "Knowledge Seeker",
+            "description": "Attend or watch Islamic lecture"
+        },
+        "family_bond": {
+            "title": "Family Bond",
+            "description": "Break fast with family or friends"
+        },
+        "patience_training": {
+            "title": "Patience Training",
+            "description": "Control anger and speak kindly all day"
+        }
+    },
+    "achievements": {
+        "first_day": {
+            "title": "First Day Complete",
+            "description": "Complete your first day of Ramadhan"
+        },
+        "seven_days": {
+            "title": "7-Day Consistency",
+            "description": "Maintain perfect streak for 7 days"
+        },
+        "quran_100": {
+            "title": "100 Quran Pages",
+            "description": "Read 100 pages of Quran"
+        },
+        "master": {
+            "title": "Ramadhan Master",
+            "description": "Complete all 30 days with perfect record"
+        },
+        "prayer_warrior": {
+            "title": "Prayer Warrior",
+            "description": "Complete all 5 prayers for 15 consecutive days"
+        },
+        "generous": {
+            "title": "Generous Heart",
+            "description": "Give charity for 20 days"
+        },
+        "night_prayer": {
+            "title": "Night Servant",
+            "description": "Complete tarawih for 25 days"
+        },
+        "quran_complete": {
+            "title": "Quran Completion",
+            "description": "Read all 604 pages of Quran"
+        }
     }
 }

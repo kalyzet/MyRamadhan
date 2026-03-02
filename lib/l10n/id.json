@@ -95,7 +95,9 @@
         "compare_sessions": "Bandingkan Sesi",
         "select_sessions": "Pilih sesi untuk dibandingkan (2-4)",
         "cancel": "Batal",
-        "compare": "Bandingkan"
+        "compare": "Bandingkan",
+        "sessions_selected": "sesi dipilih",
+        "clear": "Bersihkan"
     },
     "comparison": {
         "title": "Perbandingan Sesi",
@@ -170,5 +172,81 @@
         "stats": "Statistik",
         "achievements": "Pencapaian",
         "profile": "Profil"
+    },
+    "side_quests": {
+        "early_bird": {
+            "title": "Burung Pagi",
+            "description": "Sholat Subuh dalam 15 menit setelah Adzan"
+        },
+        "quran_expert": {
+            "title": "Ahli Al-Quran",
+            "description": "Baca 5 halaman Al-Quran dengan terjemahan"
+        },
+        "generous_soul": {
+            "title": "Jiwa Dermawan",
+            "description": "Berikan sedekah kepada 3 orang berbeda"
+        },
+        "community_helper": {
+            "title": "Penolong Komunitas",
+            "description": "Bantu menyiapkan iftar untuk orang lain"
+        },
+        "dhikr_master": {
+            "title": "Master Dzikir",
+            "description": "Ucapkan Subhanallah 100 kali"
+        },
+        "night_warrior": {
+            "title": "Pejuang Malam",
+            "description": "Sholat Tahajjud sebelum Subuh"
+        },
+        "dua_specialist": {
+            "title": "Spesialis Doa",
+            "description": "Berdoa untuk 10 orang berbeda"
+        },
+        "knowledge_seeker": {
+            "title": "Pencari Ilmu",
+            "description": "Hadiri atau tonton ceramah Islam"
+        },
+        "family_bond": {
+            "title": "Ikatan Keluarga",
+            "description": "Berbuka puasa bersama keluarga atau teman"
+        },
+        "patience_training": {
+            "title": "Latihan Kesabaran",
+            "description": "Kendalikan amarah dan berbicara baik sepanjang hari"
+        }
+    },
+    "achievements": {
+        "first_day": {
+            "title": "Hari Pertama Selesai",
+            "description": "Selesaikan hari pertama Ramadhan Anda"
+        },
+        "seven_days": {
+            "title": "Konsistensi 7 Hari",
+            "description": "Pertahankan streak sempurna selama 7 hari"
+        },
+        "quran_100": {
+            "title": "100 Halaman Al-Quran",
+            "description": "Baca 100 halaman Al-Quran"
+        },
+        "master": {
+            "title": "Master Ramadhan",
+            "description": "Selesaikan semua 30 hari dengan catatan sempurna"
+        },
+        "prayer_warrior": {
+            "title": "Pejuang Sholat",
+            "description": "Selesaikan semua 5 sholat selama 15 hari berturut-turut"
+        },
+        "generous": {
+            "title": "Hati Dermawan",
+            "description": "Berikan sedekah selama 20 hari"
+        },
+        "night_prayer": {
+            "title": "Hamba Malam",
+            "description": "Selesaikan tarawih selama 25 hari"
+        },
+        "quran_complete": {
+            "title": "Khatam Al-Quran",
+            "description": "Baca semua 604 halaman Al-Quran"
+        }
     }
 }

@@ -68,7 +68,7 @@ class AchievementsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildAchievementsGrid(unlockedAchievements, true),
+                _buildAchievementsGrid(unlockedAchievements, true, t),
                 const SizedBox(height: 24),
               ],
 
@@ -83,7 +83,7 @@ class AchievementsScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildAchievementsGrid(lockedAchievements, false),
+                _buildAchievementsGrid(lockedAchievements, false, t),
               ],
             ],
           ),
@@ -160,7 +160,7 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAchievementsGrid(List<Achievement> achievements, bool unlocked) {
+  Widget _buildAchievementsGrid(List<Achievement> achievements, bool unlocked, Function(String) t) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -172,12 +172,12 @@ class AchievementsScreen extends StatelessWidget {
       ),
       itemCount: achievements.length,
       itemBuilder: (context, index) {
-        return _buildAchievementCard(achievements[index], unlocked);
+        return _buildAchievementCard(achievements[index], unlocked, t);
       },
     );
   }
 
-  Widget _buildAchievementCard(Achievement achievement, bool unlocked) {
+  Widget _buildAchievementCard(Achievement achievement, bool unlocked, Function(String) t) {
     return Container(
       decoration: BoxDecoration(
         color: unlocked
@@ -211,7 +211,7 @@ class AchievementsScreen extends StatelessWidget {
 
             // Title
             Text(
-              achievement.title,
+              t(achievement.title),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: unlocked ? Colors.white : Colors.white38,
@@ -227,7 +227,7 @@ class AchievementsScreen extends StatelessWidget {
             if (unlocked && achievement.unlockedDate != null)
               _buildUnlockDate(achievement.unlockedDate!)
             else
-              _buildCriteria(achievement.description, unlocked),
+              _buildCriteria(achievement.description, unlocked, t),
           ],
         ),
       ),
@@ -322,9 +322,9 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCriteria(String description, bool unlocked) {
+  Widget _buildCriteria(String description, bool unlocked, Function(String) t) {
     return Text(
-      description,
+      t(description),
       textAlign: TextAlign.center,
       style: TextStyle(
         color: unlocked ? Colors.white60 : Colors.white24,
