@@ -57,7 +57,39 @@
         "locked": "Terkunci",
         "no_session": "Tidak ada sesi aktif. Silakan buat sesi Ramadhan baru.",
         "no_achievements": "Tidak ada pencapaian tersedia.",
-        "complete": "Selesai"
+        "complete": "Selesai",
+        "first_day": {
+            "title": "Hari Pertama Selesai",
+            "description": "Selesaikan hari pertama Ramadhan Anda"
+        },
+        "seven_days": {
+            "title": "Konsistensi 7 Hari",
+            "description": "Pertahankan streak sempurna selama 7 hari"
+        },
+        "quran_100": {
+            "title": "100 Halaman Al-Quran",
+            "description": "Baca 100 halaman Al-Quran"
+        },
+        "master": {
+            "title": "Master Ramadhan",
+            "description": "Selesaikan semua 30 hari dengan catatan sempurna"
+        },
+        "prayer_warrior": {
+            "title": "Pejuang Sholat",
+            "description": "Selesaikan semua 5 sholat selama 15 hari berturut-turut"
+        },
+        "generous": {
+            "title": "Hati Dermawan",
+            "description": "Berikan sedekah selama 20 hari"
+        },
+        "night_prayer": {
+            "title": "Hamba Malam",
+            "description": "Selesaikan tarawih selama 25 hari"
+        },
+        "quran_complete": {
+            "title": "Khatam Al-Quran",
+            "description": "Baca semua 604 halaman Al-Quran"
+        }
     },
     "profile": {
         "title": "Profil",
@@ -213,40 +245,6 @@
         "patience_training": {
             "title": "Latihan Kesabaran",
             "description": "Kendalikan amarah dan berbicara baik sepanjang hari"
-        }
-    },
-    "achievements": {
-        "first_day": {
-            "title": "Hari Pertama Selesai",
-            "description": "Selesaikan hari pertama Ramadhan Anda"
-        },
-        "seven_days": {
-            "title": "Konsistensi 7 Hari",
-            "description": "Pertahankan streak sempurna selama 7 hari"
-        },
-        "quran_100": {
-            "title": "100 Halaman Al-Quran",
-            "description": "Baca 100 halaman Al-Quran"
-        },
-        "master": {
-            "title": "Master Ramadhan",
-            "description": "Selesaikan semua 30 hari dengan catatan sempurna"
-        },
-        "prayer_warrior": {
-            "title": "Pejuang Sholat",
-            "description": "Selesaikan semua 5 sholat selama 15 hari berturut-turut"
-        },
-        "generous": {
-            "title": "Hati Dermawan",
-            "description": "Berikan sedekah selama 20 hari"
-        },
-        "night_prayer": {
-            "title": "Hamba Malam",
-            "description": "Selesaikan tarawih selama 25 hari"
-        },
-        "quran_complete": {
-            "title": "Khatam Al-Quran",
-            "description": "Baca semua 604 halaman Al-Quran"
         }
     }
 }
