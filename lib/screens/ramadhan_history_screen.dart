@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/ramadhan_session.dart';
 import '../models/user_stats.dart';
 import '../models/daily_record.dart';
 import '../repositories/session_repository.dart';
 import '../repositories/stats_repository.dart';
 import '../repositories/daily_record_repository.dart';
+import '../providers/app_state.dart';
 import 'session_comparison_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -88,11 +90,14 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    final t = appState.localizationService.translate;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Riwayat Ramadhan',
-          style: TextStyle(
+        title: Text(
+          t('history.title'),
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -107,7 +112,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
             IconButton(
               icon: const Icon(Icons.compare_arrows, color: Colors.white),
               onPressed: _navigateToComparison,
-              tooltip: 'Bandingkan Sesi',
+              tooltip: t('history.compare_sessions'),
             ),
         ],
       ),
@@ -137,29 +142,32 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
   }
 
   Widget _buildHistoryContent() {
+    final appState = Provider.of<AppState>(context);
+    final t = appState.localizationService.translate;
+    
     if (_sessions == null || _sessions!.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.history,
               size: 64,
               color: Colors.white38,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
-              'Belum Ada Sesi Ramadhan',
-              style: TextStyle(
+              t('history.no_sessions'),
+              style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
-              'Buat sesi pertama Anda untuk mulai melacak',
-              style: TextStyle(
+              t('history.no_sessions_message'),
+              style: const TextStyle(
                 color: Colors.white38,
                 fontSize: 14,
               ),
@@ -179,7 +187,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
-          _buildHeader(sortedSessions.length),
+          _buildHeader(sortedSessions.length, t),
           const SizedBox(height: 20),
 
           // Selection hint
@@ -194,18 +202,18 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                   width: 1,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.info_outline,
                     color: Color(0xFF10B981),
                     size: 20,
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Ketuk sesi untuk memilihnya untuk perbandingan',
-                      style: TextStyle(
+                      t('history.select_sessions'),
+                      style: const TextStyle(
                         color: Color(0xFF10B981),
                         fontSize: 13,
                       ),
@@ -237,7 +245,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        '${_selectedSessionIds.length} sesi dipilih',
+                        '${_selectedSessionIds.length} ${t('history.sessions_selected')}',
                         style: const TextStyle(
                           color: Color(0xFFD97706),
                           fontSize: 13,
@@ -252,9 +260,9 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                         _selectedSessionIds.clear();
                       });
                     },
-                    child: const Text(
-                      'Bersihkan',
-                      style: TextStyle(
+                    child: Text(
+                      t('history.clear'),
+                      style: const TextStyle(
                         color: Color(0xFFD97706),
                         fontSize: 13,
                       ),
@@ -268,14 +276,14 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
           // Sessions list
           ...sortedSessions.map((session) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: _buildSessionCard(session),
+                child: _buildSessionCard(session, t),
               )),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(int totalSessions) {
+  Widget _buildHeader(int totalSessions, Function(String) t) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -303,7 +311,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
             ),
           ),
           Text(
-            totalSessions == 1 ? 'Sesi Ramadhan' : 'Sesi Ramadhan',
+            totalSessions == 1 ? t('history.year') : t('history.year'),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -314,7 +322,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
     );
   }
 
-  Widget _buildSessionCard(RamadhanSession session) {
+  Widget _buildSessionCard(RamadhanSession session, Function(String) t) {
     final stats = _statsMap?[session.id];
     final completionRate = _completionRates?[session.id] ?? 0.0;
     final dateFormat = DateFormat('MMM d, y');
@@ -438,7 +446,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       children: [
                         Expanded(
                           child: _buildStatItem(
-                            'Level',
+                            t('history.level'),
                             '${stats.level}',
                             Icons.trending_up,
                             const Color(0xFF10B981),
@@ -447,7 +455,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatItem(
-                            'Total XP',
+                            t('history.total_xp'),
                             '${stats.totalXp}',
                             Icons.stars,
                             const Color(0xFFD97706),
@@ -460,7 +468,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       children: [
                         Expanded(
                           child: _buildStatItem(
-                            'Streak Terpanjang',
+                            t('stats.longest_streak'),
                             '${stats.longestStreak}',
                             Icons.local_fire_department,
                             const Color(0xFFEF4444),
@@ -469,7 +477,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatItem(
-                            'Penyelesaian',
+                            t('history.completion'),
                             '${completionRate.toStringAsFixed(0)}%',
                             Icons.check_circle,
                             const Color(0xFF10B981),
@@ -478,10 +486,10 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       ],
                     ),
                   ] else
-                    const Center(
+                    Center(
                       child: Text(
-                        'Tidak ada statistik tersedia',
-                        style: TextStyle(
+                        t('stats.no_stats'),
+                        style: const TextStyle(
                           color: Colors.white38,
                           fontSize: 13,
                         ),

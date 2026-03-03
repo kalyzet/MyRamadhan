@@ -61,56 +61,56 @@ class SideQuestRepository {
       return; // Quests already generated for this date
     }
 
-    // Define quest pool
+    // Define quest pool with translation keys
     final questPool = [
       {
-        'title': 'Burung Pagi',
-        'description': 'Sholat Subuh dalam 15 menit setelah Adzan',
+        'title_key': 'side_quests.early_bird.title',
+        'description_key': 'side_quests.early_bird.description',
         'xp_reward': 25,
       },
       {
-        'title': 'Ahli Al-Quran',
-        'description': 'Baca 5 halaman Al-Quran dengan terjemahan',
+        'title_key': 'side_quests.quran_expert.title',
+        'description_key': 'side_quests.quran_expert.description',
         'xp_reward': 30,
       },
       {
-        'title': 'Jiwa Dermawan',
-        'description': 'Berikan sedekah kepada 3 orang berbeda',
+        'title_key': 'side_quests.generous_soul.title',
+        'description_key': 'side_quests.generous_soul.description',
         'xp_reward': 40,
       },
       {
-        'title': 'Penolong Komunitas',
-        'description': 'Bantu menyiapkan iftar untuk orang lain',
+        'title_key': 'side_quests.community_helper.title',
+        'description_key': 'side_quests.community_helper.description',
         'xp_reward': 35,
       },
       {
-        'title': 'Master Dzikir',
-        'description': 'Ucapkan Subhanallah 100 kali',
+        'title_key': 'side_quests.dhikr_master.title',
+        'description_key': 'side_quests.dhikr_master.description',
         'xp_reward': 20,
       },
       {
-        'title': 'Pejuang Malam',
-        'description': 'Sholat Tahajjud sebelum Subuh',
+        'title_key': 'side_quests.night_warrior.title',
+        'description_key': 'side_quests.night_warrior.description',
         'xp_reward': 45,
       },
       {
-        'title': 'Spesialis Doa',
-        'description': 'Berdoa untuk 10 orang berbeda',
+        'title_key': 'side_quests.dua_specialist.title',
+        'description_key': 'side_quests.dua_specialist.description',
         'xp_reward': 25,
       },
       {
-        'title': 'Pencari Ilmu',
-        'description': 'Hadiri atau tonton ceramah Islam',
+        'title_key': 'side_quests.knowledge_seeker.title',
+        'description_key': 'side_quests.knowledge_seeker.description',
         'xp_reward': 30,
       },
       {
-        'title': 'Ikatan Keluarga',
-        'description': 'Berbuka puasa bersama keluarga atau teman',
+        'title_key': 'side_quests.family_bond.title',
+        'description_key': 'side_quests.family_bond.description',
         'xp_reward': 20,
       },
       {
-        'title': 'Latihan Kesabaran',
-        'description': 'Kendalikan amarah dan berbicara baik sepanjang hari',
+        'title_key': 'side_quests.patience_training.title',
+        'description_key': 'side_quests.patience_training.description',
         'xp_reward': 35,
       },
     ];
@@ -135,8 +135,8 @@ class SideQuestRepository {
       final quest = SideQuest(
         sessionId: sessionId,
         date: normalizedDate,
-        title: questData['title'] as String,
-        description: questData['description'] as String,
+        title: questData['title_key'] as String,
+        description: questData['description_key'] as String,
         xpReward: questData['xp_reward'] as int,
         completed: false,
       );

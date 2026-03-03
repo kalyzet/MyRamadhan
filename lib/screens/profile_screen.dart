@@ -16,6 +16,8 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        final t = appState.localizationService.translate;
+        
         if (appState.isLoading) {
           return const ProfileScreenSkeleton();
         }
@@ -38,15 +40,15 @@ class ProfileScreen extends StatelessWidget {
                   // Session will automatically reload after creation
                   if (result == true && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Sesi dibuat! Sesi sebelumnya dinonaktifkan.'),
-                        backgroundColor: Color(0xFF10B981),
+                      SnackBar(
+                        content: Text(t('profile.session_created')),
+                        backgroundColor: const Color(0xFF10B981),
                       ),
                     );
                   }
                 },
                 icon: const Icon(Icons.add_circle_outline),
-                label: const Text('Buat Sesi Baru'),
+                label: Text(t('profile.create_new_session')),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF10B981),
                   foregroundColor: Colors.white,
@@ -60,9 +62,9 @@ class ProfileScreen extends StatelessWidget {
 
               // Active Session Information
               if (activeSession != null)
-                _buildSessionInfoCard(activeSession)
+                _buildSessionInfoCard(context, activeSession)
               else
-                _buildNoSessionCard(),
+                _buildNoSessionCard(context),
               const SizedBox(height: 16),
 
               // Ramadhan History Link
@@ -74,11 +76,11 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Kalyzet Team Credits
-              _buildTeamCreditsCard(),
+              _buildTeamCreditsCard(context),
               const SizedBox(height: 16),
 
               // About Section
-              _buildAboutCard(),
+              _buildAboutCard(context),
             ],
           ),
         );
@@ -86,7 +88,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSessionInfoCard(RamadhanSession session) {
+  Widget _buildSessionInfoCard(BuildContext context, RamadhanSession session) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     final today = DateTime.now();
     final daysSinceStart = today.difference(session.startDate).inDays + 1;
     final currentDay = daysSinceStart.clamp(1, session.totalDays);
@@ -105,17 +110,17 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.calendar_month,
                 color: Colors.white,
                 size: 24,
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(
-                'Sesi Aktif',
-                style: TextStyle(
+                t('profile.active_session'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -124,28 +129,31 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _buildSessionInfoRow('Tahun', '${session.year}'),
+          _buildSessionInfoRow(t('profile.year'), '${session.year}'),
           const SizedBox(height: 12),
           _buildSessionInfoRow(
-            'Durasi',
-            '${session.totalDays} hari',
+            t('profile.duration'),
+            '${session.totalDays} ${t('create_session.days')}',
           ),
           const SizedBox(height: 12),
           _buildSessionInfoRow(
-            'Hari Saat Ini',
-            'Hari $currentDay dari ${session.totalDays}',
+            t('profile.current_day'),
+            '${t('profile.day_of')} $currentDay ${t('home.of')} ${session.totalDays}',
           ),
           const SizedBox(height: 12),
           _buildSessionInfoRow(
-            'Hari Tersisa',
-            '$daysRemaining hari',
+            t('profile.days_remaining'),
+            '$daysRemaining ${t('create_session.days')}',
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNoSessionCard() {
+  Widget _buildNoSessionCard(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -156,27 +164,27 @@ class ProfileScreen extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.info_outline,
             color: Colors.white38,
             size: 48,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'Tidak Ada Sesi Aktif',
-            style: TextStyle(
+            t('profile.no_active_session'),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Buat sesi Ramadhan baru untuk mulai melacak perjalanan Anda',
+            t('profile.no_session_message'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white38,
               fontSize: 14,
             ),
@@ -210,6 +218,9 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildHistoryCard(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -245,22 +256,22 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Riwayat Ramadhan',
-                    style: TextStyle(
+                    t('profile.ramadhan_history'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Lihat semua sesi sebelumnya',
-                    style: TextStyle(
+                    t('profile.view_previous_sessions'),
+                    style: const TextStyle(
                       color: Colors.white60,
                       fontSize: 13,
                     ),
@@ -280,6 +291,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLanguageCard(BuildContext context, AppState appState) {
+    final t = appState.localizationService.translate;
     // Get current language from AppState
     final currentLanguage = appState.currentLanguage;
 
@@ -296,17 +308,17 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.language,
                 color: Color(0xFF10B981),
                 size: 24,
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(
-                'Language / Bahasa',
-                style: TextStyle(
+                t('profile.language'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -430,7 +442,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamCreditsCard() {
+  Widget _buildTeamCreditsCard(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -468,17 +483,17 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Team Name
-          const Text(
-            'Dikembangkan oleh',
-            style: TextStyle(
+          Text(
+            t('profile.developed_by'),
+            style: const TextStyle(
               color: Colors.white60,
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Kalyzet Team',
-            style: TextStyle(
+          Text(
+            t('profile.kalyzet_team'),
+            style: const TextStyle(
               color: Color(0xFFD97706), // Gold
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -487,10 +502,10 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Description
-          const Text(
-            'Membangun alat untuk meningkatkan perjalanan spiritual Anda',
+          Text(
+            t('profile.team_description'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
             ),
@@ -500,7 +515,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutCard() {
+  Widget _buildAboutCard(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -510,17 +528,17 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.info,
                 color: Color(0xFF10B981),
                 size: 24,
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(
-                'Tentang',
-                style: TextStyle(
+                t('profile.about'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -529,15 +547,15 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildAboutRow('Nama Aplikasi', 'MyRamadhan'),
+          _buildAboutRow(t('profile.app_name_label'), t('app_name')),
           const SizedBox(height: 12),
-          _buildAboutRow('Versi', '1.0.0'),
+          _buildAboutRow(t('profile.version'), '1.0.0'),
           const SizedBox(height: 12),
-          _buildAboutRow('Platform', 'Flutter'),
+          _buildAboutRow(t('profile.platform'), 'Flutter'),
           const SizedBox(height: 16),
-          const Text(
-            'MyRamadhan adalah aplikasi pendamping gamifikasi yang membantu Anda melacak aktivitas ibadah, membangun konsistensi melalui streak, dan merefleksikan perjalanan spiritual Anda selama Ramadhan.',
-            style: TextStyle(
+          Text(
+            t('profile.app_description'),
+            style: const TextStyle(
               color: Colors.white60,
               fontSize: 13,
               height: 1.5,

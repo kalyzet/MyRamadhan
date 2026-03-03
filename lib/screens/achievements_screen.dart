@@ -14,15 +14,17 @@ class AchievementsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
+        final t = appState.localizationService.translate;
+        
         if (appState.isLoading) {
           return const AchievementsScreenSkeleton();
         }
 
         if (appState.activeSession == null) {
-          return const Center(
+          return Center(
             child: Text(
-              'Tidak ada sesi aktif. Silakan buat sesi Ramadhan baru.',
-              style: TextStyle(color: Colors.white70),
+              t('achievements.no_session'),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           );
@@ -31,10 +33,10 @@ class AchievementsScreen extends StatelessWidget {
         final achievements = appState.achievements;
 
         if (achievements.isEmpty) {
-          return const Center(
+          return Center(
             child: Text(
-              'Tidak ada pencapaian tersedia.',
-              style: TextStyle(color: Colors.white70),
+              t('achievements.no_achievements'),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           );
@@ -52,36 +54,36 @@ class AchievementsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Header with progress
-              _buildHeader(unlockedAchievements.length, achievements.length),
+              _buildHeader(context, unlockedAchievements.length, achievements.length),
               const SizedBox(height: 24),
 
               // Unlocked achievements section
               if (unlockedAchievements.isNotEmpty) ...[
-                const Text(
-                  'Terbuka',
-                  style: TextStyle(
+                Text(
+                  t('achievements.unlocked'),
+                  style: const TextStyle(
                     color: Color(0xFFD97706), // Gold
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildAchievementsGrid(unlockedAchievements, true),
+                _buildAchievementsGrid(unlockedAchievements, true, t),
                 const SizedBox(height: 24),
               ],
 
               // Locked achievements section
               if (lockedAchievements.isNotEmpty) ...[
-                const Text(
-                  'Terkunci',
-                  style: TextStyle(
+                Text(
+                  t('achievements.locked'),
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildAchievementsGrid(lockedAchievements, false),
+                _buildAchievementsGrid(lockedAchievements, false, t),
               ],
             ],
           ),
@@ -90,7 +92,9 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(int unlocked, int total) {
+  Widget _buildHeader(BuildContext context, int unlocked, int total) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final t = appState.localizationService.translate;
     final progress = total > 0 ? unlocked / total : 0.0;
 
     return Container(
@@ -105,18 +109,18 @@ class AchievementsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.emoji_events,
                 color: Colors.white,
                 size: 32,
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text(
-                'Pencapaian',
-                style: TextStyle(
+                t('achievements.title'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -126,7 +130,7 @@ class AchievementsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '$unlocked / $total Terbuka',
+            '$unlocked / $total ${t('achievements.unlocked')}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -145,7 +149,7 @@ class AchievementsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${(progress * 100).toStringAsFixed(0)}% Selesai',
+            '${(progress * 100).toStringAsFixed(0)}% ${t('achievements.complete')}',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -156,7 +160,7 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAchievementsGrid(List<Achievement> achievements, bool unlocked) {
+  Widget _buildAchievementsGrid(List<Achievement> achievements, bool unlocked, Function(String) t) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -168,12 +172,12 @@ class AchievementsScreen extends StatelessWidget {
       ),
       itemCount: achievements.length,
       itemBuilder: (context, index) {
-        return _buildAchievementCard(achievements[index], unlocked);
+        return _buildAchievementCard(achievements[index], unlocked, t);
       },
     );
   }
 
-  Widget _buildAchievementCard(Achievement achievement, bool unlocked) {
+  Widget _buildAchievementCard(Achievement achievement, bool unlocked, Function(String) t) {
     return Container(
       decoration: BoxDecoration(
         color: unlocked
@@ -207,7 +211,7 @@ class AchievementsScreen extends StatelessWidget {
 
             // Title
             Text(
-              achievement.title,
+              t(achievement.title),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: unlocked ? Colors.white : Colors.white38,
@@ -223,7 +227,7 @@ class AchievementsScreen extends StatelessWidget {
             if (unlocked && achievement.unlockedDate != null)
               _buildUnlockDate(achievement.unlockedDate!)
             else
-              _buildCriteria(achievement.description, unlocked),
+              _buildCriteria(achievement.description, unlocked, t),
           ],
         ),
       ),
@@ -318,9 +322,9 @@ class AchievementsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCriteria(String description, bool unlocked) {
+  Widget _buildCriteria(String description, bool unlocked, Function(String) t) {
     return Text(
-      description,
+      t(description),
       textAlign: TextAlign.center,
       style: TextStyle(
         color: unlocked ? Colors.white60 : Colors.white24,
