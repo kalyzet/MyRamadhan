@@ -129,7 +129,8 @@
         "cancel": "Cancel",
         "compare": "Compare",
         "sessions_selected": "sessions selected",
-        "clear": "Clear"
+        "clear": "Clear",
+        "active": "ACTIVE"
     },
     "comparison": {
         "title": "Session Comparison",

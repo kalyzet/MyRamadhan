@@ -129,7 +129,8 @@
         "cancel": "Batal",
         "compare": "Bandingkan",
         "sessions_selected": "sesi dipilih",
-        "clear": "Bersihkan"
+        "clear": "Bersihkan",
+        "active": "AKTIF"
     },
     "comparison": {
         "title": "Perbandingan Sesi",

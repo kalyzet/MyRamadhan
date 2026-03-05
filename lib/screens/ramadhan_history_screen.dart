@@ -7,8 +7,8 @@ import '../repositories/session_repository.dart';
 import '../repositories/stats_repository.dart';
 import '../repositories/daily_record_repository.dart';
 import '../providers/app_state.dart';
+import '../services/date_formatting_service.dart';
 import 'session_comparison_screen.dart';
-import 'package:intl/intl.dart';
 
 /// Ramadhan History screen displaying all previous sessions
 /// Requirements: 12.1
@@ -323,9 +323,10 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
   }
 
   Widget _buildSessionCard(RamadhanSession session, Function(String) t) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final dateFormattingService = DateFormattingService(appState.localizationService);
     final stats = _statsMap?[session.id];
     final completionRate = _completionRates?[session.id] ?? 0.0;
-    final dateFormat = DateFormat('MMM d, y');
     final isSelected = _selectedSessionIds.contains(session.id);
 
     return GestureDetector(
@@ -401,9 +402,9 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                         color: const Color(0xFF10B981),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'AKTIF',
-                        style: TextStyle(
+                      child: Text(
+                        t('history.active'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -430,7 +431,7 @@ class _RamadhanHistoryScreenState extends State<RamadhanHistoryScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${dateFormat.format(session.startDate)} - ${dateFormat.format(session.endDate)}',
+                        '${dateFormattingService.formatDate(session.startDate)} - ${dateFormattingService.formatDate(session.endDate)}',
                         style: const TextStyle(
                           color: Colors.white60,
                           fontSize: 13,
