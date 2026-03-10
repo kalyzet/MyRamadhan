@@ -272,5 +272,22 @@
             "november": "November",
             "december": "December"
         }
+    },
+    "session_comparison": {
+        "title": "Session Comparison",
+        "no_sessions": "No sessions to compare",
+        "session_selected": "Session Selected",
+        "sessions_compared": "Sessions Compared",
+        "metrics": {
+            "level": "Level",
+            "total_xp": "Total XP",
+            "longest_streak": "Longest Streak",
+            "prayer_streak": "Prayer Streak",
+            "tilawah_streak": "Tilawah Streak",
+            "completion_rate": "Completion Rate"
+        },
+        "ramadhan_label": "Ramadhan",
+        "delta_same": "Same",
+        "error_loading": "Error loading comparison data:"
     }
 }

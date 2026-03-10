@@ -272,5 +272,22 @@
             "november": "November",
             "december": "Desember"
         }
+    },
+    "session_comparison": {
+        "title": "Perbandingan Sesi",
+        "no_sessions": "Tidak ada sesi untuk dibandingkan",
+        "session_selected": "Sesi Dipilih",
+        "sessions_compared": "Sesi Dibandingkan",
+        "metrics": {
+            "level": "Level",
+            "total_xp": "Total XP",
+            "longest_streak": "Streak Terpanjang",
+            "prayer_streak": "Streak Sholat",
+            "tilawah_streak": "Streak Tilawah",
+            "completion_rate": "Tingkat Penyelesaian"
+        },
+        "ramadhan_label": "Ramadhan",
+        "delta_same": "Sama",
+        "error_loading": "Kesalahan memuat data perbandingan:"
     }
 }
