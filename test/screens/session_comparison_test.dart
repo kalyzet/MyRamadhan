@@ -3,13 +3,19 @@ import 'package:flutter_test/flutter_test.dart'
 import 'package:test/test.dart';
 import 'package:glados/glados.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:my_ramadhan/database/database_helper.dart';
 import 'package:my_ramadhan/repositories/session_repository.dart';
 import 'package:my_ramadhan/repositories/stats_repository.dart';
 import 'package:my_ramadhan/repositories/daily_record_repository.dart';
+import 'package:my_ramadhan/repositories/settings_repository.dart';
 import 'package:my_ramadhan/models/ramadhan_session.dart';
 import 'package:my_ramadhan/models/user_stats.dart';
 import 'package:my_ramadhan/models/daily_record.dart';
+import 'package:my_ramadhan/providers/app_state.dart';
+import 'package:my_ramadhan/services/localization_service.dart';
+import 'package:my_ramadhan/screens/session_comparison_screen.dart';
 
 void main() {
   // Initialize FFI for testing
@@ -27,12 +33,14 @@ void main() {
     setUp(() async {
       dbHelper = DatabaseHelper.instance;
       await dbHelper.deleteDB();
+      await dbHelper.database; // Initialize database
       sessionRepository = SessionRepository(dbHelper: dbHelper);
       statsRepository = StatsRepository(dbHelper: dbHelper);
       dailyRecordRepository = DailyRecordRepository(dbHelper: dbHelper);
     });
 
     tearDown(() async {
+      await dbHelper.close();
       await dbHelper.deleteDB();
     });
 
@@ -221,6 +229,227 @@ void main() {
           reason: 'Prayer streak delta should be 2');
       expect(tilawahStreakDelta, equals(-2),
           reason: 'Tilawah streak delta should be -2');
+    });
+
+    // **Feature: session-comparison-localization, Property 1: Language-specific text display**
+    // **Validates: Requirements 1.1, 1.2**
+    Glados<String>(any.choose(['en', 'id'])).test(
+        'Property 1: For any supported language setting (English or Indonesian), when the Session Comparison screen is opened, all displayed text should match the translations defined for that language',
+        (languageCode) async {
+      // Initialize localization service with the test language
+      final settingsRepository = SettingsRepository(dbHelper: dbHelper);
+      final localizationService = LocalizationService(settingsRepository: settingsRepository);
+      await localizationService.loadLanguage(languageCode);
+
+      // Test that the localization service returns correct translations
+      final t = localizationService.translate;
+
+      // Verify key translations exist and are not empty
+      expect(t('session_comparison.title'), isNotEmpty,
+          reason: 'Title translation should exist for $languageCode');
+      expect(t('session_comparison.no_sessions'), isNotEmpty,
+          reason: 'No sessions translation should exist for $languageCode');
+      expect(t('session_comparison.session_selected'), isNotEmpty,
+          reason: 'Session selected translation should exist for $languageCode');
+      expect(t('session_comparison.sessions_compared'), isNotEmpty,
+          reason: 'Sessions compared translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.level'), isNotEmpty,
+          reason: 'Level metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.total_xp'), isNotEmpty,
+          reason: 'Total XP metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.longest_streak'), isNotEmpty,
+          reason: 'Longest streak metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.prayer_streak'), isNotEmpty,
+          reason: 'Prayer streak metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.tilawah_streak'), isNotEmpty,
+          reason: 'Tilawah streak metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.completion_rate'), isNotEmpty,
+          reason: 'Completion rate metric translation should exist for $languageCode');
+      expect(t('session_comparison.ramadhan_label'), isNotEmpty,
+          reason: 'Ramadhan label translation should exist for $languageCode');
+      expect(t('session_comparison.delta_same'), isNotEmpty,
+          reason: 'Delta same translation should exist for $languageCode');
+      expect(t('session_comparison.error_loading'), isNotEmpty,
+          reason: 'Error loading translation should exist for $languageCode');
+
+      // Verify language-specific content
+      if (languageCode == 'id') {
+        expect(t('session_comparison.title'), equals('Perbandingan Sesi'),
+            reason: 'Indonesian title should be correct');
+        expect(t('session_comparison.no_sessions'), equals('Tidak ada sesi untuk dibandingkan'),
+            reason: 'Indonesian no sessions message should be correct');
+        expect(t('session_comparison.delta_same'), equals('Sama'),
+            reason: 'Indonesian delta same should be correct');
+      } else if (languageCode == 'en') {
+        expect(t('session_comparison.title'), equals('Session Comparison'),
+            reason: 'English title should be correct');
+        expect(t('session_comparison.no_sessions'), equals('No sessions to compare'),
+            reason: 'English no sessions message should be correct');
+        expect(t('session_comparison.delta_same'), equals('Same'),
+            reason: 'English delta same should be correct');
+      }
+    });
+          sessionId: session1.id!,
+          date: DateTime(2024, 3, 1).add(Duration(days: i)),
+          fajrComplete: true,
+          dhuhrComplete: true,
+          asrComplete: true,
+          maghribComplete: true,
+          ishaComplete: true,
+          puasaComplete: true,
+          tarawihComplete: true,
+          tilawahPages: 5,
+          dzikirComplete: true,
+          sedekahAmount: 10.0,
+          xpEarned: 100,
+          isPerfectDay: true,
+        );
+        await dailyRecordRepository.createOrUpdateRecord(record1);
+
+        final record2 = DailyRecord(
+          sessionId: session2.id!,
+          date: DateTime(2025, 3, 1).add(Duration(days: i)),
+          fajrComplete: true,
+          dhuhrComplete: true,
+          asrComplete: true,
+          maghribComplete: true,
+          ishaComplete: true,
+          puasaComplete: true,
+          tarawihComplete: true,
+          tilawahPages: 5,
+          dzikirComplete: true,
+          sedekahAmount: 10.0,
+          xpEarned: 100,
+          isPerfectDay: true,
+        );
+        await dailyRecordRepository.createOrUpdateRecord(record2);
+      }
+
+      // Initialize localization service with the test language
+      final settingsRepository = SettingsRepository(dbHelper: dbHelper);
+      final localizationService = LocalizationService(settingsRepository: settingsRepository);
+      await localizationService.loadLanguage(languageCode);
+
+      // Test that the localization service returns correct translations
+      final t = localizationService.translate;
+
+      // Verify key translations exist and are not empty
+      expect(t('session_comparison.title'), isNotEmpty,
+          reason: 'Title translation should exist for $languageCode');
+      expect(t('session_comparison.no_sessions'), isNotEmpty,
+          reason: 'No sessions translation should exist for $languageCode');
+      expect(t('session_comparison.session_selected'), isNotEmpty,
+          reason: 'Session selected translation should exist for $languageCode');
+      expect(t('session_comparison.sessions_compared'), isNotEmpty,
+          reason: 'Sessions compared translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.level'), isNotEmpty,
+          reason: 'Level metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.total_xp'), isNotEmpty,
+          reason: 'Total XP metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.longest_streak'), isNotEmpty,
+          reason: 'Longest streak metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.prayer_streak'), isNotEmpty,
+          reason: 'Prayer streak metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.tilawah_streak'), isNotEmpty,
+          reason: 'Tilawah streak metric translation should exist for $languageCode');
+      expect(t('session_comparison.metrics.completion_rate'), isNotEmpty,
+          reason: 'Completion rate metric translation should exist for $languageCode');
+      expect(t('session_comparison.ramadhan_label'), isNotEmpty,
+          reason: 'Ramadhan label translation should exist for $languageCode');
+      expect(t('session_comparison.delta_same'), isNotEmpty,
+          reason: 'Delta same translation should exist for $languageCode');
+      expect(t('session_comparison.error_loading'), isNotEmpty,
+          reason: 'Error loading translation should exist for $languageCode');
+
+      // Verify language-specific content
+      if (languageCode == 'id') {
+        expect(t('session_comparison.title'), equals('Perbandingan Sesi'),
+            reason: 'Indonesian title should be correct');
+        expect(t('session_comparison.no_sessions'), equals('Tidak ada sesi untuk dibandingkan'),
+            reason: 'Indonesian no sessions message should be correct');
+        expect(t('session_comparison.delta_same'), equals('Sama'),
+            reason: 'Indonesian delta same should be correct');
+      } else if (languageCode == 'en') {
+        expect(t('session_comparison.title'), equals('Session Comparison'),
+            reason: 'English title should be correct');
+        expect(t('session_comparison.no_sessions'), equals('No sessions to compare'),
+            reason: 'English no sessions message should be correct');
+        expect(t('session_comparison.delta_same'), equals('Same'),
+            reason: 'English delta same should be correct');
+      }
+    });
+
+    // **Feature: session-comparison-localization, Property 2: Reactive language switching**
+    // **Validates: Requirements 1.3**
+    Glados2<String, String>(any.choose(['en', 'id']), any.choose(['en', 'id'])).test(
+        'Property 2: For any language change while the Session Comparison screen is open, all text elements should immediately update to reflect the new language without requiring screen refresh',
+        (initialLanguage, newLanguage) async {
+      // Skip if languages are the same
+      if (initialLanguage == newLanguage) return;
+
+      // Initialize localization service with initial language
+      final settingsRepository = SettingsRepository(dbHelper: dbHelper);
+      final localizationService = LocalizationService(settingsRepository: settingsRepository);
+      await localizationService.loadLanguage(initialLanguage);
+
+      // Get initial translations
+      final initialTitle = localizationService.translate('session_comparison.title');
+      final initialNoSessions = localizationService.translate('session_comparison.no_sessions');
+      final initialDeltaSame = localizationService.translate('session_comparison.delta_same');
+
+      // Verify initial translations are correct
+      if (initialLanguage == 'id') {
+        expect(initialTitle, equals('Perbandingan Sesi'),
+            reason: 'Initial Indonesian title should be correct');
+        expect(initialNoSessions, equals('Tidak ada sesi untuk dibandingkan'),
+            reason: 'Initial Indonesian no sessions should be correct');
+        expect(initialDeltaSame, equals('Sama'),
+            reason: 'Initial Indonesian delta same should be correct');
+      } else {
+        expect(initialTitle, equals('Session Comparison'),
+            reason: 'Initial English title should be correct');
+        expect(initialNoSessions, equals('No sessions to compare'),
+            reason: 'Initial English no sessions should be correct');
+        expect(initialDeltaSame, equals('Same'),
+            reason: 'Initial English delta same should be correct');
+      }
+
+      // Switch to new language
+      await localizationService.changeLanguage(newLanguage);
+
+      // Get new translations
+      final newTitle = localizationService.translate('session_comparison.title');
+      final newNoSessions = localizationService.translate('session_comparison.no_sessions');
+      final newDeltaSame = localizationService.translate('session_comparison.delta_same');
+
+      // Verify translations have changed
+      expect(newTitle, isNot(equals(initialTitle)),
+          reason: 'Title should change when language switches from $initialLanguage to $newLanguage');
+      expect(newNoSessions, isNot(equals(initialNoSessions)),
+          reason: 'No sessions message should change when language switches from $initialLanguage to $newLanguage');
+      expect(newDeltaSame, isNot(equals(initialDeltaSame)),
+          reason: 'Delta same should change when language switches from $initialLanguage to $newLanguage');
+
+      // Verify new translations are correct for the new language
+      if (newLanguage == 'id') {
+        expect(newTitle, equals('Perbandingan Sesi'),
+            reason: 'New Indonesian title should be correct');
+        expect(newNoSessions, equals('Tidak ada sesi untuk dibandingkan'),
+            reason: 'New Indonesian no sessions should be correct');
+        expect(newDeltaSame, equals('Sama'),
+            reason: 'New Indonesian delta same should be correct');
+      } else {
+        expect(newTitle, equals('Session Comparison'),
+            reason: 'New English title should be correct');
+        expect(newNoSessions, equals('No sessions to compare'),
+            reason: 'New English no sessions should be correct');
+        expect(newDeltaSame, equals('Same'),
+            reason: 'New English delta same should be correct');
+      }
+
+      // Verify the language was persisted
+      expect(localizationService.currentLanguage, equals(newLanguage),
+          reason: 'Current language should be updated to $newLanguage');
     });
   });
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/ramadhan_session.dart';
 import '../models/user_stats.dart';
-import '../repositories/session_repository.dart';
 import '../repositories/stats_repository.dart';
 import '../repositories/daily_record_repository.dart';
-import 'package:intl/intl.dart';
+import '../providers/app_state.dart';
 
 /// Session comparison screen for comparing multiple Ramadhan sessions
 /// Requirements: 12.2, 12.3
@@ -29,6 +29,41 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
   Map<int, UserStats>? _statsMap;
   Map<int, double>? _completionRates;
   bool _isLoading = true;
+
+  /// English fallback translations for when LocalizationService fails
+  static const Map<String, String> _englishFallbacks = {
+    'session_comparison.title': 'Session Comparison',
+    'session_comparison.error_loading': 'Error loading comparison data:',
+    'session_comparison.no_sessions': 'No sessions to compare',
+    'session_comparison.session_selected': 'Session Selected',
+    'session_comparison.sessions_compared': 'Sessions Compared',
+    'session_comparison.ramadhan_label': 'Ramadhan',
+    'session_comparison.delta_same': 'Same',
+    'session_comparison.metrics.level': 'Level',
+    'session_comparison.metrics.total_xp': 'Total XP',
+    'session_comparison.metrics.longest_streak': 'Longest Streak',
+    'session_comparison.metrics.prayer_streak': 'Prayer Streak',
+    'session_comparison.metrics.tilawah_streak': 'Tilawah Streak',
+    'session_comparison.metrics.completion_rate': 'Completion Rate',
+  };
+
+  /// Safely translate a key with fallback to English
+  String _safeTranslate(String Function(String)? translate, String key) {
+    try {
+      if (translate != null) {
+        final result = translate(key);
+        // If translation returns the key itself, it means translation failed
+        if (result != key) {
+          return result;
+        }
+      }
+    } catch (e) {
+      // Translation failed, fall back to English
+    }
+    
+    // Return English fallback or the key if no fallback exists
+    return _englishFallbacks[key] ?? key;
+  }
 
   @override
   void initState() {
@@ -74,9 +109,21 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
         _isLoading = false;
       });
       if (mounted) {
+        // Safely get the localization service from the app state
+        String Function(String)? translate;
+        try {
+          final appState = Provider.of<AppState>(context, listen: false);
+          translate = appState.localizationService.translate;
+        } catch (localizationError) {
+          // LocalizationService is unavailable, translate will remain null
+          translate = null;
+        }
+        
+        final errorMessage = _safeTranslate(translate, 'session_comparison.error_loading');
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading comparison data: $e'),
+            content: Text('$errorMessage $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -86,37 +133,50 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Session Comparison',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF10B981),
+    return Consumer<AppState>(
+      builder: (context, appState, child) {
+        // Safely get the translation function
+        String Function(String)? translate;
+        try {
+          translate = appState.localizationService.translate;
+        } catch (e) {
+          // LocalizationService is unavailable, translate will remain null
+          translate = null;
+        }
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              _safeTranslate(translate, 'session_comparison.title'),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-            )
-          : _buildComparisonContent(),
+            ),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: _isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: const Color(0xFF10B981),
+                  ),
+                )
+              : _buildComparisonContent(translate),
+        );
+      },
     );
   }
 
-  Widget _buildComparisonContent() {
+  Widget _buildComparisonContent(String Function(String)? translate) {
     if (widget.sessions.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No sessions to compare',
-          style: TextStyle(
+          _safeTranslate(translate, 'session_comparison.no_sessions'),
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 16,
           ),
@@ -134,30 +194,30 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
-          _buildHeader(),
+          _buildHeader(translate),
           const SizedBox(height: 20),
 
           // Comparison metrics
-          _buildMetricComparison('Level', (stats) => stats.level),
+          _buildMetricComparison(_safeTranslate(translate, 'session_comparison.metrics.level'), (stats) => stats.level, translate),
           const SizedBox(height: 16),
-          _buildMetricComparison('Total XP', (stats) => stats.totalXp),
-          const SizedBox(height: 16),
-          _buildMetricComparison(
-              'Longest Streak', (stats) => stats.longestStreak),
+          _buildMetricComparison(_safeTranslate(translate, 'session_comparison.metrics.total_xp'), (stats) => stats.totalXp, translate),
           const SizedBox(height: 16),
           _buildMetricComparison(
-              'Prayer Streak', (stats) => stats.prayerStreak),
+              _safeTranslate(translate, 'session_comparison.metrics.longest_streak'), (stats) => stats.longestStreak, translate),
           const SizedBox(height: 16),
           _buildMetricComparison(
-              'Tilawah Streak', (stats) => stats.tilawahStreak),
+              _safeTranslate(translate, 'session_comparison.metrics.prayer_streak'), (stats) => stats.prayerStreak, translate),
           const SizedBox(height: 16),
-          _buildCompletionRateComparison(),
+          _buildMetricComparison(
+              _safeTranslate(translate, 'session_comparison.metrics.tilawah_streak'), (stats) => stats.tilawahStreak, translate),
+          const SizedBox(height: 16),
+          _buildCompletionRateComparison(translate),
         ],
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(String Function(String)? translate) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -186,8 +246,8 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
           ),
           Text(
             widget.sessions.length == 1
-                ? 'Session Selected'
-                : 'Sessions Compared',
+                ? _safeTranslate(translate, 'session_comparison.session_selected')
+                : _safeTranslate(translate, 'session_comparison.sessions_compared'),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 16,
@@ -199,7 +259,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
   }
 
   Widget _buildMetricComparison(
-      String metricName, int Function(UserStats) getValue) {
+      String metricName, int Function(UserStats) getValue, String Function(String)? translate) {
     final sortedSessions = List<RamadhanSession>.from(widget.sessions);
     sortedSessions.sort((a, b) => a.year.compareTo(b.year));
 
@@ -285,7 +345,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
                 children: [
                   // Year
                   Text(
-                    'Ramadhan ${session.year}',
+                    '${_safeTranslate(translate, 'session_comparison.ramadhan_label')} ${session.year}',
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -296,7 +356,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
                   Row(
                     children: [
                       if (delta != null) ...[
-                        _buildDeltaIndicator(delta),
+                        _buildDeltaIndicator(delta, translate),
                         const SizedBox(width: 12),
                       ],
                       Text(
@@ -318,7 +378,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
     );
   }
 
-  Widget _buildCompletionRateComparison() {
+  Widget _buildCompletionRateComparison(String Function(String)? translate) {
     final sortedSessions = List<RamadhanSession>.from(widget.sessions);
     sortedSessions.sort((a, b) => a.year.compareTo(b.year));
 
@@ -366,9 +426,9 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
                 topRight: Radius.circular(14),
               ),
             ),
-            child: const Text(
-              'Completion Rate',
-              style: TextStyle(
+            child: Text(
+              _safeTranslate(translate, 'session_comparison.metrics.completion_rate'),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -396,7 +456,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
                 children: [
                   // Year
                   Text(
-                    'Ramadhan ${session.year}',
+                    '${_safeTranslate(translate, 'session_comparison.ramadhan_label')} ${session.year}',
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -407,7 +467,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
                   Row(
                     children: [
                       if (delta != null) ...[
-                        _buildDeltaIndicator(delta),
+                        _buildDeltaIndicator(delta, translate),
                         const SizedBox(width: 12),
                       ],
                       Text(
@@ -429,7 +489,7 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
     );
   }
 
-  Widget _buildDeltaIndicator(MetricDelta delta) {
+  Widget _buildDeltaIndicator(MetricDelta delta, String Function(String)? translate) {
     if (delta.isSame) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -437,17 +497,17 @@ class _SessionComparisonScreenState extends State<SessionComparisonScreen> {
           color: const Color(0xFF6B7280),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.remove,
               color: Colors.white,
               size: 14,
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Text(
-              'Same',
-              style: TextStyle(
+              _safeTranslate(translate, 'session_comparison.delta_same'),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
