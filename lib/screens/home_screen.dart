@@ -24,9 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
   OverlayEntry? _levelUpOverlay;
   AppState? _appState;
 
+  // Owned by this State (not rebuilt inside build) so typing survives
+  // Consumer rebuilds triggered by record saves.
+  late final TextEditingController _tilawahController;
+  late final TextEditingController _sedekahController;
+  final FocusNode _tilawahFocus = FocusNode();
+  final FocusNode _sedekahFocus = FocusNode();
+
   @override
   void initState() {
     super.initState();
+
+    _tilawahController = TextEditingController(text: '0');
+    _sedekahController = TextEditingController(text: '0');
 
     // Set up animation callbacks after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -51,6 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _appState?.onXpGained = null;
     _appState?.onLevelUp = null;
     _appState = null;
+
+    _tilawahController.dispose();
+    _sedekahController.dispose();
+    _tilawahFocus.dispose();
+    _sedekahFocus.dispose();
 
     _xpOverlay?.remove();
     _levelUpOverlay?.remove();
@@ -227,7 +242,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-}
 
   Widget _buildDayIndicator(BuildContext context, int currentDay, int totalDays) {
     final appState = Provider.of<AppState>(context, listen: false);
@@ -566,9 +580,13 @@ class _HomeScreenState extends State<HomeScreen> {
     DailyRecord? todayRecord,
   ) {
     final t = appState.localizationService.translate;
-    final controller = TextEditingController(
-      text: todayRecord?.tilawahPages.toString() ?? '0',
-    );
+
+    // Sync from the record only when the user is not typing in the field,
+    // so saves triggered elsewhere never clobber in-progress input.
+    final expectedPages = (todayRecord?.tilawahPages ?? 0).toString();
+    if (!_tilawahFocus.hasFocus && _tilawahController.text != expectedPages) {
+      _tilawahController.text = expectedPages;
+    }
 
     return Row(
       children: [
@@ -590,7 +608,8 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           width: 80,
           child: TextField(
-            controller: controller,
+            controller: _tilawahController,
+            focusNode: _tilawahFocus,
             keyboardType: TextInputType.number,
             style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
@@ -629,9 +648,12 @@ class _HomeScreenState extends State<HomeScreen> {
     DailyRecord? todayRecord,
   ) {
     final t = appState.localizationService.translate;
-    final controller = TextEditingController(
-      text: todayRecord?.sedekahAmount.toString() ?? '0',
-    );
+
+    // Sync from the record only when the user is not typing in the field.
+    final expectedAmount = (todayRecord?.sedekahAmount ?? 0).toString();
+    if (!_sedekahFocus.hasFocus && _sedekahController.text != expectedAmount) {
+      _sedekahController.text = expectedAmount;
+    }
 
     return Row(
       children: [
@@ -653,7 +675,8 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           width: 100,
           child: TextField(
-            controller: controller,
+            controller: _sedekahController,
+            focusNode: _sedekahFocus,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
@@ -1051,6 +1074,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+}
 
 /// Animated checkbox tile with smooth transitions
 /// Requirements: 11.2 (60 FPS animations)

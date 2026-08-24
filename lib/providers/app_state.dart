@@ -54,6 +54,7 @@ class AppState extends ChangeNotifier {
 
   // Loading and error state
   bool _isLoading = false;
+  bool _isSaving = false;
   String? _errorMessage;
 
   // Animation callbacks
@@ -67,6 +68,12 @@ class AppState extends ChangeNotifier {
   List<Achievement> get achievements => _achievements;
   List<SideQuest> get todaySideQuests => _todaySideQuests;
   bool get isLoading => _isLoading;
+
+  /// True while a record/quest mutation is being persisted. Unlike
+  /// [isLoading], this must NOT replace whole screens with skeletons —
+  /// mutations happen constantly (every checkbox toggle) and flashing the
+  /// entire UI destroys input state.
+  bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
   String get currentLanguage => _currentLanguage;
   LocalizationService get localizationService => _localizationService;
@@ -310,7 +317,9 @@ class AppState extends ChangeNotifier {
       rethrow;
     }
 
-    _isLoading = true;
+    // Persist silently: toggling _isLoading here would flash a full-screen
+    // skeleton over the checklist on every checkbox toggle (M4).
+    _isSaving = true;
     _errorMessage = null;
     notifyListeners();
 
@@ -405,7 +414,7 @@ class AppState extends ChangeNotifier {
       _errorMessage = 'Failed to update record. Please try again.';
       rethrow;
     } finally {
-      _isLoading = false;
+      _isSaving = false;
       notifyListeners();
     }
   }
@@ -418,7 +427,8 @@ class AppState extends ChangeNotifier {
       throw StateError('No active session');
     }
 
-    _isLoading = true;
+    // Persist silently — see isSaving doc (M4)
+    _isSaving = true;
     _errorMessage = null;
     notifyListeners();
 
@@ -456,7 +466,7 @@ class AppState extends ChangeNotifier {
       _errorMessage = 'Failed to complete quest. Please try again.';
       rethrow;
     } finally {
-      _isLoading = false;
+      _isSaving = false;
       notifyListeners();
     }
   }
