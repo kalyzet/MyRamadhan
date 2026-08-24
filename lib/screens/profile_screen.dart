@@ -6,6 +6,7 @@ import '../repositories/session_repository.dart';
 import '../widgets/create_session_dialog.dart';
 import 'ramadhan_history_screen.dart';
 import '../widgets/skeleton_loader.dart';
+import '../services/date_normalizer.dart';
 
 /// Profile screen displaying user session information and team credits
 /// Requirements: 13.1, 13.2, 13.3
@@ -92,8 +93,7 @@ class ProfileScreen extends StatelessWidget {
     final appState = Provider.of<AppState>(context, listen: false);
     final t = appState.localizationService.translate;
     
-    final today = DateTime.now();
-    final daysSinceStart = today.difference(session.startDate).inDays + 1;
+    final daysSinceStart = DateNormalizer.daysBetween(session.startDate, DateTime.now()) + 1;
     final currentDay = daysSinceStart.clamp(1, session.totalDays);
     final daysRemaining = session.totalDays - currentDay;
 

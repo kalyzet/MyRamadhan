@@ -40,13 +40,21 @@ class SessionRepository {
     try {
       final db = await _dbHelper.database;
 
+      // Support mid-Ramadhan starts: if the user says today is day N of the
+      // month, shift the effective start date back by N-1 days so day
+      // counting matches the real Ramadhan calendar.
+      final effectiveStart =
+          currentDayNumber != null && currentDayNumber > 1
+              ? startDate.subtract(Duration(days: currentDayNumber - 1))
+              : startDate;
+
       // Calculate end date
-      final endDate = startDate.add(Duration(days: totalDays - 1));
+      final endDate = effectiveStart.add(Duration(days: totalDays - 1));
 
       // Create session object
       final session = RamadhanSession(
         year: year,
-        startDate: startDate,
+        startDate: effectiveStart,
         endDate: endDate,
         totalDays: totalDays,
         createdAt: DateTime.now(),
@@ -173,6 +181,33 @@ class SessionRepository {
       rethrow;
     } catch (e) {
       throw app_exceptions.DatabaseException.transaction(originalError: e);
+    }
+  }
+
+  /// Mark a specific session as completed (deactivated)
+  /// Used when a session's end date has passed and the user finishes it
+  Future<void> completeSession(int sessionId) async {
+    try {
+      final db = await _dbHelper.database;
+
+      final count = await db.update(
+        'ramadhan_sessions',
+        {'is_active': 0},
+        where: 'id = ? AND is_active = ?',
+        whereArgs: [sessionId, 1],
+      );
+
+      if (count == 0) {
+        // Session was already inactive; nothing to do
+        return;
+      }
+    } on app_exceptions.DatabaseException {
+      rethrow;
+    } catch (e) {
+      throw app_exceptions.DatabaseException.general(
+        message: 'Failed to complete session',
+        originalError: e,
+      );
     }
   }
 

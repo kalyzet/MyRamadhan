@@ -14,11 +14,16 @@ class AchievementTrackerService {
 
   /// Check all achievement criteria and unlock achievements that meet their conditions
   /// This method should be called after daily records are updated
+  ///
+  /// Achievements are matched by [Achievement.iconName], which is a stable
+  /// non-localized identifier. Titles are translation keys and must never be
+  /// used for matching.
   Future<void> checkAndUnlockAchievements(
     int sessionId,
     UserStats stats,
-    List<DailyRecord> records,
-  ) async {
+    List<DailyRecord> records, {
+    int totalDays = 30,
+  }) async {
     // Get all achievements for the session
     final achievements = await _achievementRepository.getAchievementsForSession(sessionId);
 
@@ -29,15 +34,23 @@ class AchievementTrackerService {
 
       bool shouldUnlock = false;
 
-      // Check based on achievement title (matching the initialized achievements)
-      if (achievement.title == 'First Day Completed') {
+      // Check based on the stable iconName identifier
+      if (achievement.iconName == 'first_day') {
         shouldUnlock = shouldUnlockFirstDay(records);
-      } else if (achievement.title == '7 Day Consistency') {
+      } else if (achievement.iconName == 'seven_days') {
         shouldUnlock = shouldUnlock7DayStreak(stats);
-      } else if (achievement.title == '100 Quran Pages') {
+      } else if (achievement.iconName == 'quran_100') {
         shouldUnlock = shouldUnlock100Pages(records);
-      } else if (achievement.title == 'Ramadhan Master') {
-        shouldUnlock = shouldUnlockRamadhanMaster(records);
+      } else if (achievement.iconName == 'master') {
+        shouldUnlock = shouldUnlockRamadhanMaster(records, totalDays);
+      } else if (achievement.iconName == 'prayer_warrior') {
+        shouldUnlock = shouldUnlockPrayerWarrior(stats);
+      } else if (achievement.iconName == 'generous') {
+        shouldUnlock = shouldUnlockGenerous(records);
+      } else if (achievement.iconName == 'night_prayer') {
+        shouldUnlock = shouldUnlockNightPrayer(records);
+      } else if (achievement.iconName == 'quran_complete') {
+        shouldUnlock = shouldUnlockQuranComplete(records);
       }
 
       // Unlock the achievement if criteria met
@@ -69,10 +82,37 @@ class AchievementTrackerService {
     return totalPages >= 100;
   }
 
-  /// Check if user has completed all 30 days with perfect records
-  /// Returns true if there are 30 records and all are perfect days
-  bool shouldUnlockRamadhanMaster(List<DailyRecord> records) {
-    if (records.length < 30) return false;
+  /// Check if user has completed all session days with perfect records
+  /// Returns true if there are at least [totalDays] records and all are perfect days
+  bool shouldUnlockRamadhanMaster(List<DailyRecord> records, int totalDays) {
+    if (records.length < totalDays) return false;
     return records.every((record) => record.isPerfectDay);
+  }
+
+  /// Check if user has maintained a 7-day prayer streak
+  /// Returns true if the current prayer streak is >= 7
+  bool shouldUnlockPrayerWarrior(UserStats stats) {
+    return stats.prayerStreak >= 7;
+  }
+
+  /// Check if user has given sedekah on at least 15 different days
+  bool shouldUnlockGenerous(List<DailyRecord> records) {
+    final generousDays = records.where((record) => record.sedekahAmount > 0);
+    return generousDays.length >= 15;
+  }
+
+  /// Check if user has completed tarawih on at least 20 days
+  bool shouldUnlockNightPrayer(List<DailyRecord> records) {
+    final tarawihDays = records.where((record) => record.tarawihComplete);
+    return tarawihDays.length >= 20;
+  }
+
+  /// Check if user has read the equivalent of a full Quran (604 pages)
+  bool shouldUnlockQuranComplete(List<DailyRecord> records) {
+    final totalPages = records.fold<int>(
+      0,
+      (sum, record) => sum + record.tilawahPages,
+    );
+    return totalPages >= 604;
   }
 }

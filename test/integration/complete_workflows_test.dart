@@ -138,7 +138,7 @@ void main() {
 
       final achievements = await achievementRepository.getAchievementsForSession(session.id!);
       final firstDayAchievement = achievements.firstWhere(
-        (a) => a.title == 'First Day Completed',
+        (a) => a.iconName == 'first_day',
       );
       expect(firstDayAchievement.unlocked, isTrue);
     });
@@ -228,7 +228,7 @@ void main() {
       // Verify 7-day streak achievement
       final achievements = await achievementRepository.getAchievementsForSession(session.id!);
       final sevenDayAchievement = achievements.firstWhere(
-        (a) => a.title == '7 Day Consistency',
+        (a) => a.iconName == 'seven_days',
       );
       expect(sevenDayAchievement.unlocked, isTrue);
     });
@@ -590,19 +590,19 @@ void main() {
       final achievements = await achievementRepository.getAchievementsForSession(session.id!);
 
       // First Day achievement
-      final firstDay = achievements.firstWhere((a) => a.title == 'First Day Completed');
+      final firstDay = achievements.firstWhere((a) => a.iconName == 'first_day');
       expect(firstDay.unlocked, isTrue);
 
       // 7 Day Consistency achievement
-      final sevenDay = achievements.firstWhere((a) => a.title == '7 Day Consistency');
+      final sevenDay = achievements.firstWhere((a) => a.iconName == 'seven_days');
       expect(sevenDay.unlocked, isTrue);
 
       // 100 Quran Pages achievement (30 days * 5 pages = 150 pages)
-      final quran100 = achievements.firstWhere((a) => a.title == '100 Quran Pages');
+      final quran100 = achievements.firstWhere((a) => a.iconName == 'quran_100');
       expect(quran100.unlocked, isTrue);
 
       // Ramadhan Master achievement (all 30 days perfect)
-      final master = achievements.firstWhere((a) => a.title == 'Ramadhan Master');
+      final master = achievements.firstWhere((a) => a.iconName == 'master');
       expect(master.unlocked, isTrue);
     });
   });

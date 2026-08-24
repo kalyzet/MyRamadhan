@@ -35,16 +35,21 @@ class SideQuestRepository {
     });
   }
 
-  /// Complete a side quest by marking it as completed
-  Future<void> completeSideQuest(int questId) async {
+  /// Complete a side quest by marking it as completed.
+  /// Returns true if the quest was actually transitioned from incomplete
+  /// to complete; false if it was already completed. Callers must only
+  /// award XP when this returns true.
+  Future<bool> completeSideQuest(int questId) async {
     final db = await _dbHelper.database;
 
-    await db.update(
+    final count = await db.update(
       'side_quests',
       {'completed': 1},
-      where: 'id = ?',
-      whereArgs: [questId],
+      where: 'id = ? AND completed = ?',
+      whereArgs: [questId, 0],
     );
+
+    return count > 0;
   }
 
   /// Generate daily side quests for a specific date

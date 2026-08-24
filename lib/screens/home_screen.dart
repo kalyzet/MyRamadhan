@@ -7,6 +7,7 @@ import '../widgets/xp_gain_animation.dart';
 import '../widgets/error_display.dart';
 import '../widgets/skeleton_loader.dart';
 import '../widgets/real_time_clock_widget.dart';
+import '../services/date_normalizer.dart';
 
 /// Home screen displaying daily checklist and progress
 /// Requirements: 10.3, 11.1
@@ -21,19 +22,22 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   OverlayEntry? _xpOverlay;
   OverlayEntry? _levelUpOverlay;
+  AppState? _appState;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Set up animation callbacks after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final appState = Provider.of<AppState>(context, listen: false);
-      
+      _appState = appState;
+
       appState.onXpGained = (xpAmount) {
         _showXpGainAnimation(xpAmount);
       };
-      
+
       appState.onLevelUp = (newLevel) {
         _showLevelUpAnimation(newLevel);
       };
@@ -42,6 +46,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    // Detach callbacks so a pending save finishing after this screen is
+    // disposed cannot insert overlays into a defunct context.
+    _appState?.onXpGained = null;
+    _appState?.onLevelUp = null;
+    _appState = null;
+
     _xpOverlay?.remove();
     _levelUpOverlay?.remove();
     super.dispose();
@@ -180,8 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final sideQuests = appState.todaySideQuests;
 
         // Calculate current Ramadhan day
-        final today = DateTime.now();
-        final daysSinceStart = today.difference(session.startDate).inDays + 1;
+        final daysSinceStart =
+            DateNormalizer.daysBetween(session.startDate, DateTime.now()) + 1;
         final currentDay = daysSinceStart.clamp(1, session.totalDays);
 
         return SingleChildScrollView(

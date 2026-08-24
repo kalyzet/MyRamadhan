@@ -191,7 +191,7 @@ void main() {
         ),
       );
 
-      expect(service.shouldUnlockRamadhanMaster(records), true);
+      expect(service.shouldUnlockRamadhanMaster(records, 30), true);
     });
 
     test('shouldUnlockRamadhanMaster returns false when less than 30 days', () {
@@ -215,7 +215,35 @@ void main() {
         ),
       );
 
-      expect(service.shouldUnlockRamadhanMaster(records), false);
+      // 29 records < 30 totalDays → not unlocked
+      expect(service.shouldUnlockRamadhanMaster(records, 30), false);
+    });
+
+    test(
+        'shouldUnlockRamadhanMaster returns true for 29 perfect days in a 29-day session',
+        () {
+      final records = List.generate(
+        29,
+        (index) => DailyRecord(
+          sessionId: 1,
+          date: DateTime(2024, 3, 15 + index),
+          fajrComplete: true,
+          dhuhrComplete: true,
+          asrComplete: true,
+          maghribComplete: true,
+          ishaComplete: true,
+          puasaComplete: true,
+          tarawihComplete: true,
+          tilawahPages: 5,
+          dzikirComplete: true,
+          sedekahAmount: 10.0,
+          xpEarned: 240,
+          isPerfectDay: true,
+        ),
+      );
+
+      // 29 perfect records match the session's 29 totalDays → unlocked
+      expect(service.shouldUnlockRamadhanMaster(records, 29), true);
     });
 
     test(
@@ -241,7 +269,7 @@ void main() {
         ),
       );
 
-      expect(service.shouldUnlockRamadhanMaster(records), false);
+      expect(service.shouldUnlockRamadhanMaster(records, 30), false);
     });
   });
 
@@ -277,9 +305,9 @@ void main() {
       final achievements =
           await repository.getAchievementsForSession(validSessionId);
 
-      // Find the "First Day Completed" achievement
+      // Find the "First Day" achievement by its stable iconName
       final firstDayAchievement = achievements.firstWhere(
-        (a) => a.title == 'First Day Completed',
+        (a) => a.iconName == 'first_day',
       );
 
       // Record the time before unlocking
@@ -329,7 +357,7 @@ void main() {
       final updatedAchievements =
           await repository.getAchievementsForSession(validSessionId);
       final unlockedAchievement = updatedAchievements.firstWhere(
-        (a) => a.title == 'First Day Completed',
+        (a) => a.iconName == 'first_day',
       );
 
       // Verify the achievement is unlocked

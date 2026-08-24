@@ -182,10 +182,11 @@ void main() {
     });
 
     test('Write-then-read consistency for side quest completion', () async {
-      // Create a session
+      // Create a session that is active today (not expired)
+      final now = DateTime.now();
       final session = await appState.createNewSession(
-        year: 2024,
-        startDate: DateTime(2024, 3, 1),
+        year: now.year,
+        startDate: DateTime(now.year, now.month, now.day),
         totalDays: 30,
       );
 

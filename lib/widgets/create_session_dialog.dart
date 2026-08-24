@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
+import '../services/date_normalizer.dart';
 
 /// Dialog for creating a new Ramadhan session
 /// Requirements: 1.1, 1.3, 1.4
@@ -16,7 +17,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
   final _yearController = TextEditingController();
   final _currentDayController = TextEditingController();
   
-  DateTime _startDate = DateTime.now();
+  DateTime _startDate = DateNormalizer.today();
   int _duration = 30; // Default to 30 days
   bool _isMidRamadhan = false;
   bool _isCreating = false;
@@ -59,7 +60,7 @@ class _CreateSessionDialogState extends State<CreateSessionDialog> {
     
     if (picked != null && picked != _startDate) {
       setState(() {
-        _startDate = picked;
+        _startDate = DateNormalizer.normalize(picked);
       });
     }
   }

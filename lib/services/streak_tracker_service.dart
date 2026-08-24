@@ -155,10 +155,13 @@ class StreakTrackerService {
     DateTime? previousDate;
 
     for (final record in sortedRecords) {
+      final recordDate =
+          DateTime(record.date.year, record.date.month, record.date.day);
+
       // Check if there's a gap in dates (more than 1 day)
       bool hasGap = false;
       if (previousDate != null) {
-        final daysDifference = record.date.difference(previousDate).inDays;
+        final daysDifference = recordDate.difference(previousDate).inDays;
         if (daysDifference > 1) {
           hasGap = true;
         }
@@ -211,7 +214,7 @@ class StreakTrackerService {
         tilawahStreak = 0;
       }
 
-      previousDate = record.date;
+      previousDate = recordDate;
     }
 
     // Update stats in database with final calculated values

@@ -6,6 +6,7 @@ import 'screens/stats_screen.dart';
 import 'screens/achievements_screen.dart';
 import 'screens/profile_screen.dart';
 import 'widgets/error_boundary.dart';
+import 'screens/final_summary_screen.dart';
 import 'dart:developer' as developer;
 
 void main() async {
@@ -72,6 +73,10 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
+  // Tracks which expired session has already shown its final summary,
+  // so the summary is pushed once per session instead of on every build.
+  int? _summaryShownSessionId;
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const StatsScreen(),
@@ -83,6 +88,34 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     final t = appState.localizationService.translate;
+
+    // When the active session has passed its end date, show the final
+    // summary once. The session is deactivated when the user finishes it.
+    final session = appState.activeSession;
+    if (appState.isSessionExpired &&
+        !appState.isLoading &&
+        session?.id != null &&
+        _summaryShownSessionId != session!.id) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _summaryShownSessionId = session.id);
+        Navigator.of(context, rootNavigator: true)
+            .push(MaterialPageRoute(
+              builder: (context) => FinalSummaryScreen(
+                session: session,
+                onFinish: () => appState.completeActiveSession(),
+              ),
+            ))
+            .then((_) {
+          // If the route was popped without finishing (e.g. system back),
+          // make sure the expired session is still completed.
+          if (mounted && appState.isSessionExpired) {
+            appState.completeActiveSession();
+          }
+        });
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
