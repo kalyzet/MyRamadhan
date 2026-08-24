@@ -1,10 +1,8 @@
-import 'package:flutter_test/flutter_test.dart'
+﻿import 'package:flutter_test/flutter_test.dart'
     hide test, group, setUp, tearDown, setUpAll, expect;
 import 'package:test/test.dart';
 import 'package:glados/glados.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:my_ramadhan/database/database_helper.dart';
 import 'package:my_ramadhan/repositories/session_repository.dart';
 import 'package:my_ramadhan/repositories/stats_repository.dart';
@@ -13,11 +11,12 @@ import 'package:my_ramadhan/repositories/settings_repository.dart';
 import 'package:my_ramadhan/models/ramadhan_session.dart';
 import 'package:my_ramadhan/models/user_stats.dart';
 import 'package:my_ramadhan/models/daily_record.dart';
-import 'package:my_ramadhan/providers/app_state.dart';
 import 'package:my_ramadhan/services/localization_service.dart';
-import 'package:my_ramadhan/screens/session_comparison_screen.dart';
 
 void main() {
+  // Required so rootBundle can load l10n JSON assets in plain tests
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   // Initialize FFI for testing
   setUpAll(() {
     sqfliteFfiInit();
@@ -236,95 +235,6 @@ void main() {
     Glados<String>(any.choose(['en', 'id'])).test(
         'Property 1: For any supported language setting (English or Indonesian), when the Session Comparison screen is opened, all displayed text should match the translations defined for that language',
         (languageCode) async {
-      // Initialize localization service with the test language
-      final settingsRepository = SettingsRepository(dbHelper: dbHelper);
-      final localizationService = LocalizationService(settingsRepository: settingsRepository);
-      await localizationService.loadLanguage(languageCode);
-
-      // Test that the localization service returns correct translations
-      final t = localizationService.translate;
-
-      // Verify key translations exist and are not empty
-      expect(t('session_comparison.title'), isNotEmpty,
-          reason: 'Title translation should exist for $languageCode');
-      expect(t('session_comparison.no_sessions'), isNotEmpty,
-          reason: 'No sessions translation should exist for $languageCode');
-      expect(t('session_comparison.session_selected'), isNotEmpty,
-          reason: 'Session selected translation should exist for $languageCode');
-      expect(t('session_comparison.sessions_compared'), isNotEmpty,
-          reason: 'Sessions compared translation should exist for $languageCode');
-      expect(t('session_comparison.metrics.level'), isNotEmpty,
-          reason: 'Level metric translation should exist for $languageCode');
-      expect(t('session_comparison.metrics.total_xp'), isNotEmpty,
-          reason: 'Total XP metric translation should exist for $languageCode');
-      expect(t('session_comparison.metrics.longest_streak'), isNotEmpty,
-          reason: 'Longest streak metric translation should exist for $languageCode');
-      expect(t('session_comparison.metrics.prayer_streak'), isNotEmpty,
-          reason: 'Prayer streak metric translation should exist for $languageCode');
-      expect(t('session_comparison.metrics.tilawah_streak'), isNotEmpty,
-          reason: 'Tilawah streak metric translation should exist for $languageCode');
-      expect(t('session_comparison.metrics.completion_rate'), isNotEmpty,
-          reason: 'Completion rate metric translation should exist for $languageCode');
-      expect(t('session_comparison.ramadhan_label'), isNotEmpty,
-          reason: 'Ramadhan label translation should exist for $languageCode');
-      expect(t('session_comparison.delta_same'), isNotEmpty,
-          reason: 'Delta same translation should exist for $languageCode');
-      expect(t('session_comparison.error_loading'), isNotEmpty,
-          reason: 'Error loading translation should exist for $languageCode');
-
-      // Verify language-specific content
-      if (languageCode == 'id') {
-        expect(t('session_comparison.title'), equals('Perbandingan Sesi'),
-            reason: 'Indonesian title should be correct');
-        expect(t('session_comparison.no_sessions'), equals('Tidak ada sesi untuk dibandingkan'),
-            reason: 'Indonesian no sessions message should be correct');
-        expect(t('session_comparison.delta_same'), equals('Sama'),
-            reason: 'Indonesian delta same should be correct');
-      } else if (languageCode == 'en') {
-        expect(t('session_comparison.title'), equals('Session Comparison'),
-            reason: 'English title should be correct');
-        expect(t('session_comparison.no_sessions'), equals('No sessions to compare'),
-            reason: 'English no sessions message should be correct');
-        expect(t('session_comparison.delta_same'), equals('Same'),
-            reason: 'English delta same should be correct');
-      }
-    });
-          sessionId: session1.id!,
-          date: DateTime(2024, 3, 1).add(Duration(days: i)),
-          fajrComplete: true,
-          dhuhrComplete: true,
-          asrComplete: true,
-          maghribComplete: true,
-          ishaComplete: true,
-          puasaComplete: true,
-          tarawihComplete: true,
-          tilawahPages: 5,
-          dzikirComplete: true,
-          sedekahAmount: 10.0,
-          xpEarned: 100,
-          isPerfectDay: true,
-        );
-        await dailyRecordRepository.createOrUpdateRecord(record1);
-
-        final record2 = DailyRecord(
-          sessionId: session2.id!,
-          date: DateTime(2025, 3, 1).add(Duration(days: i)),
-          fajrComplete: true,
-          dhuhrComplete: true,
-          asrComplete: true,
-          maghribComplete: true,
-          ishaComplete: true,
-          puasaComplete: true,
-          tarawihComplete: true,
-          tilawahPages: 5,
-          dzikirComplete: true,
-          sedekahAmount: 10.0,
-          xpEarned: 100,
-          isPerfectDay: true,
-        );
-        await dailyRecordRepository.createOrUpdateRecord(record2);
-      }
-
       // Initialize localization service with the test language
       final settingsRepository = SettingsRepository(dbHelper: dbHelper);
       final localizationService = LocalizationService(settingsRepository: settingsRepository);

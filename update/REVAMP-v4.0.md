@@ -177,4 +177,31 @@ _(M4 — skeleton flash & text field controller — sengaja ditunda karena touch
 ### Sisa pekerjaan
 
 - M4 (skeleton flash + text field controller) — satu-satunya item yang masih ditunda.
-- Membersihkan 2 file test rusak bawaan (`session_comparison_test.dart`, `language_switching_test.dart`).
+- Membersihkan 2 file test rusak bawaan (`session_comparison_test.dart`, `language_switching_test.dart`) -> ✅ Selesai (lihat bagian 9).
+
+---
+
+## 9. Pembersihan File Test Rusak Bawaan
+
+### `test/screens/session_comparison_test.dart`
+
+- **Masalah:** merge korup - duplikat test "Property 1" ditempel tanpa header sehingga merusak struktur file dari baris ~292 (200+ error analyzer).
+- **Perbaikan:** fragmen korup dibuang, "Property 2" (reactive language switching) diselamatkan, 4 import mati dihapus.
+- **Bonus fix runtime:** tambah `TestWidgetsFlutterBinding.ensureInitialized()` agar `rootBundle` bisa memuat aset l10n JSON dalam plain test (translate sebelumnya selalu mengembalikan key).
+- **Hasil:** 4/4 test lulus (Property 35, 36, lokalitas 1 & 2).
+
+### `test/integration/language_switching_test.dart`
+
+- **Masalah:** memanggil `appState.sessionRepository` / `appState.statsRepository` - getter yang tidak pernah ada di AppState (tidak pernah bisa compile). Pendekatan widget-test-nya juga rapuh: operasi async nyata (sqflite FFI, rootBundle) tidak selesai di dalam FakeAsync zone `testWidgets`, dan `pumpAndSettle` tidak pernah settles karena RealTimeClockWidget tick tiap detik.
+- **Perbaikan:** ditulis ulang sebagai integrasi level-service tanpa `testWidgets` - mencakup persistensi preferensi, switch bolak-balik, simulasi restart, kelengkapan terjemahan semua section di en+id, dan penolakan kode bahasa tidak valid.
+- **Hasil:** 5/5 test lulus.
+
+### Verifikasi
+
+- `flutter analyze`: **0 error di seluruh projek** (sebelumnya 200+ error dari dua file ini).
+- Kedua file lulus penuh secara individual.
+- Catatan: `language_switching_minimal_test.dart` punya 1 widget test yang gagal bawaan (terkonfirmasi via baseline `git stash`, akar masalah sama: FakeAsync vs I/O nyata) - dibiarkan karena 8 test lainnya lulus dan mencakup fungsionalitas serupa.
+
+### Catatan environment
+
+- Flutter tooling Windows kadang crash dengan `PathExistsException ... sqlite3.dll (errno 183)` saat proses test lama masih tertinggal di background - solusi: kill proses dart/flutter tersisa, hapus folder `build\native_assets`, jalankan ulang.
