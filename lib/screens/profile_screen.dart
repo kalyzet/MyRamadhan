@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../models/ramadhan_session.dart';
-import '../repositories/session_repository.dart';
 import '../widgets/create_session_dialog.dart';
 import 'ramadhan_history_screen.dart';
 import '../widgets/skeleton_loader.dart';
@@ -12,6 +12,11 @@ import '../services/date_normalizer.dart';
 /// Requirements: 13.1, 13.2, 13.3
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  /// Cached once per app run — the app version never changes at runtime,
+  /// so rebuilding this screen must not re-query the platform.
+  static final Future<PackageInfo> _packageInfo =
+      PackageInfo.fromPlatform();
 
   @override
   Widget build(BuildContext context) {
@@ -549,7 +554,13 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildAboutRow(t('profile.app_name_label'), t('app_name')),
           const SizedBox(height: 12),
-          _buildAboutRow(t('profile.version'), '1.0.0'),
+          FutureBuilder<PackageInfo>(
+            future: _packageInfo,
+            builder: (context, snapshot) {
+              final version = snapshot.data?.version ?? '';
+              return _buildAboutRow(t('profile.version'), version);
+            },
+          ),
           const SizedBox(height: 12),
           _buildAboutRow(t('profile.platform'), 'Flutter'),
           const SizedBox(height: 16),
