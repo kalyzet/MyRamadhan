@@ -8,15 +8,34 @@ import '../widgets/skeleton_loader.dart';
 
 /// Stats screen displaying user statistics and progress
 /// Requirements: 7.1, 7.2, 7.3
-class StatsScreen extends StatelessWidget {
+class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
+
+  @override
+  State<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends State<StatsScreen> {
+  // Cached futures so Consumer rebuilds (e.g. after a record save) do not
+  // refire database queries and flash loading spinners on every build.
+  Future<Map<String, dynamic>>? _summaryFuture;
+  Future<List<DailyRecord>>? _recordsFuture;
+  int? _futuresSessionId;
+
+  void _ensureFutures(int sessionId) {
+    if (_futuresSessionId != sessionId) {
+      _futuresSessionId = sessionId;
+      _summaryFuture = _calculateStatsSummary(sessionId);
+      _recordsFuture = _loadDailyRecords(sessionId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
         final t = appState.localizationService.translate;
-        
+
         if (appState.isLoading) {
           return const StatsScreenSkeleton();
         }
@@ -43,6 +62,8 @@ class StatsScreen extends StatelessWidget {
             ),
           );
         }
+
+        _ensureFutures(session.id!);
 
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -295,7 +316,7 @@ class StatsScreen extends StatelessWidget {
     final t = appState.localizationService.translate;
     
     return FutureBuilder<Map<String, dynamic>>(
-      future: _calculateStatsSummary(session.id!),
+      future: _summaryFuture,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(
@@ -423,7 +444,7 @@ class StatsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           FutureBuilder<List<DailyRecord>>(
-            future: _loadDailyRecords(session.id!),
+            future: _recordsFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(

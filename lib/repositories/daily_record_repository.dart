@@ -127,20 +127,6 @@ class DailyRecordRepository {
     return difference >= 0 && difference <= 2;
   }
 
-  /// Recalculate streaks from a specific date forward
-  /// This is called when a past record is modified
-  /// Note: Actual streak calculation logic is in StreakTrackerService
-  /// This method is a placeholder for future implementation
-  Future<void> recalculateStreaksFromDate(
-      int sessionId, DateTime fromDate) async {
-    // This will be implemented when StreakTrackerService is created
-    // For now, this is a placeholder that does nothing
-    // The actual implementation will:
-    // 1. Get all records from fromDate onwards
-    // 2. Recalculate streaks based on consecutive completions
-    // 3. Update user_stats table with new streak values
-  }
-
   /// Batch insert or update multiple daily records
   /// Uses database transaction for atomicity and performance
   /// Requirements: 9.3 - Batch operations for performance

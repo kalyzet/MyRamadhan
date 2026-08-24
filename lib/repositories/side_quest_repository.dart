@@ -120,17 +120,22 @@ class SideQuestRepository {
       },
     ];
 
-    // Select 3 random quests (using date as seed for consistency)
-    final seed = normalizedDate.day + normalizedDate.month * 31;
-    final selectedIndices = <int>[];
-    
-    // Simple pseudo-random selection based on date
-    for (var i = 0; i < 3 && i < questPool.length; i++) {
-      var index = (seed * (i + 1) * 7) % questPool.length;
-      while (selectedIndices.contains(index)) {
-        index = (index + 1) % questPool.length;
-      }
-      selectedIndices.add(index);
+    // Select 3 quests deterministically from the full date (including year,
+    // so the same calendar day in different years differs). A multiplicative
+    // hash spreads consecutive dates across the whole pool instead of
+    // collapsing onto a handful of fixed triples.
+    final seed = normalizedDate.day +
+        normalizedDate.month * 31 +
+        normalizedDate.year * 373;
+    final selectedIndices = <int>{};
+    var cursor = seed % questPool.length;
+    while (selectedIndices.length < 3 &&
+        selectedIndices.length < questPool.length) {
+      // Advance by a varying stride each step; collisions simply re-loop.
+      final step =
+          1 + ((seed * (selectedIndices.length + 3)) % (questPool.length - 1));
+      cursor = (cursor + step) % questPool.length;
+      selectedIndices.add(cursor);
     }
 
     // Insert selected quests

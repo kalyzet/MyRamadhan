@@ -254,11 +254,10 @@ class AppState extends ChangeNotifier {
         currentDayNumber: currentDayNumber,
       );
 
-      // Deactivate all other sessions and activate this one
-      await _sessionRepository.deactivateAllSessions();
-      await _sessionRepository.setActiveSession(session.id!);
-
-      // Initialize stats for the new session
+      // Initialize stats and achievements BEFORE activating, so an active
+      // session always has its supporting data. (setActiveSession atomically
+      // deactivates all other sessions in a transaction — no separate
+      // deactivate pass is needed.)
       final initialStats = UserStats(
         sessionId: session.id!,
         totalXp: 0,
@@ -272,6 +271,9 @@ class AppState extends ChangeNotifier {
 
       // Initialize achievements for the new session
       await _achievementRepository.initializeAchievements(session.id!);
+
+      // Activate this session
+      await _sessionRepository.setActiveSession(session.id!);
 
       // Reload active session data
       await loadActiveSession(forceRefresh: true);
@@ -501,18 +503,9 @@ class AppState extends ChangeNotifier {
   }
 
   /// Helper method to check if a day is perfect
-  /// A perfect day requires: all 5 prayers, puasa, tarawih, tilawah > 0, dzikir, sedekah > 0
+  /// Delegates to the shared definition in XpCalculatorService
   bool _isPerfectDay(DailyRecord record) {
-    return record.fajrComplete &&
-        record.dhuhrComplete &&
-        record.asrComplete &&
-        record.maghribComplete &&
-        record.ishaComplete &&
-        record.puasaComplete &&
-        record.tarawihComplete &&
-        record.tilawahPages > 0 &&
-        record.dzikirComplete &&
-        record.sedekahAmount > 0;
+    return XpCalculatorService.isPerfectDay(record);
   }
 
   /// Change the application language

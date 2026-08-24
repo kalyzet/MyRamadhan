@@ -2,6 +2,7 @@ import '../models/daily_record.dart';
 import '../models/user_stats.dart';
 import '../repositories/daily_record_repository.dart';
 import '../repositories/stats_repository.dart';
+import 'xp_calculator_service.dart';
 
 /// Service for tracking and calculating streaks
 /// Handles perfect day streaks, prayer streaks, and tilawah streaks
@@ -15,25 +16,11 @@ class StreakTrackerService {
   })  : _dailyRecordRepository = dailyRecordRepository,
         _statsRepository = statsRepository;
 
-  /// Check if a daily record represents a perfect day
-  /// A perfect day requires all main quest objectives to be completed:
-  /// - All 5 prayers (Fajr, Dhuhr, Asr, Maghrib, Isha)
-  /// - Puasa (fasting)
-  /// - Tarawih
-  /// - Tilawah (at least 1 page)
-  /// - Dzikir
-  /// - Sedekah (any amount > 0)
+  /// Check if a daily record represents a perfect day.
+  /// Delegates to [XpCalculatorService.isPerfectDay] — the single source
+  /// of truth for perfection shared with XP calculation.
   bool isPerfectDay(DailyRecord record) {
-    return record.fajrComplete &&
-        record.dhuhrComplete &&
-        record.asrComplete &&
-        record.maghribComplete &&
-        record.ishaComplete &&
-        record.puasaComplete &&
-        record.tarawihComplete &&
-        record.tilawahPages > 0 &&
-        record.dzikirComplete &&
-        record.sedekahAmount > 0;
+    return XpCalculatorService.isPerfectDay(record);
   }
 
   /// Check if all prayers are complete in a daily record
