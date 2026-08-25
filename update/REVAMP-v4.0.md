@@ -146,6 +146,64 @@ Saat sesi terdeteksi sudah melewati `endDate`:
 - Menjalankan beberapa file test DB secara paralel kadang memicu `database is locked` (sqflite ffi shared file) — flakiness environment; semua lulus saat dijalankan per file.
 - Flutter tooling kadang crash dengan `PathExistsException ... sqlite3.dll (errno 183)` saat proses test lama tertinggal di background — solusi: kill proses dart/flutter tersisa, hapus folder `build\native_assets`, jalankan ulang.
 
+### 7.1 Post-release: `flutter run` gagal setelah penambahan `package_info_plus`
+
+Kronologi masalah saat pertama kali menjalankan aplikasi setelah update v4.0
+(penambahan plugin `package_info_plus`), beserta solusinya:
+
+#### a) Gradle gagal download artifact — `No such host is known (dl.google.com)`
+
+```
+Could not download intellij-core-31.11.1.jar ...
+> No such host is known (dl.google.com)
+```
+
+- **Penyebab:** Gradle daemon lama meng-cached kegagalan DNS, sehingga tetap
+  gagal resolve meskipun internet/di browser normal.
+- **Solusi:** stop Gradle daemon + bersihkan cache:
+  ```bash
+  cd android && gradlew.bat --stop
+  flutter clean
+  flutter pub get
+  ```
+
+#### b) Cache Kotlin korup — `different roots: C:\...Pub\Cache... dan D:\...android`
+
+```
+IllegalArgumentException: this and base files have different roots:
+C:\Users\...\Pub\Cache\...\PackageInfoPlugin.kt and D:\...\android
+```
+
+- **Penyebab:** bug incremental compilation Kotlin di Windows saat source
+  plugin (drive `C:`) berada di drive berbeda dari project (drive `D:`).
+  Muncul sebagai suppressed exception di log build.
+- **Solusi:** ikut teratasi oleh pembersihan folder `build\` pada langkah (a).
+  Jika muncul lagi padahal jaringan normal, tambahkan di
+  `android/gradle.properties`:
+  ```properties
+  kotlin.incremental=false
+  ```
+
+#### c) `Building with plugins requires symlink support`
+
+```
+Building with plugins requires symlink support.
+Please enable Developer Mode in your system settings.
+```
+
+- **Penyebab:** plugin Windows (`package_info_plus`) membutuhkan symbolic
+  link saat build, dan Windows hanya mengizinkan pembuatan symlink ketika
+  **Developer Mode** aktif.
+- **Solusi (sekali saja untuk selamanya):**
+  ```bash
+  start ms-settings:developers
+  ```
+  lalu aktifkan toggle **Developer Mode**.
+
+> Setelah ketiga langkah di atas, `flutter run` berjalan lancar ke device
+> fisik (NE2211). Catatan: error (c) juga sempat muncul saat `flutter pub add`
+> — aktivasi Developer Mode menutup keduanya sekaligus.
+
 ---
 
 ## 8. Status Akhir
