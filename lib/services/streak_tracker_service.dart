@@ -2,6 +2,7 @@ import '../models/daily_record.dart';
 import '../models/user_stats.dart';
 import '../repositories/daily_record_repository.dart';
 import '../repositories/stats_repository.dart';
+import 'xp_calculator_service.dart';
 
 /// Service for tracking and calculating streaks
 /// Handles perfect day streaks, prayer streaks, and tilawah streaks
@@ -15,25 +16,11 @@ class StreakTrackerService {
   })  : _dailyRecordRepository = dailyRecordRepository,
         _statsRepository = statsRepository;
 
-  /// Check if a daily record represents a perfect day
-  /// A perfect day requires all main quest objectives to be completed:
-  /// - All 5 prayers (Fajr, Dhuhr, Asr, Maghrib, Isha)
-  /// - Puasa (fasting)
-  /// - Tarawih
-  /// - Tilawah (at least 1 page)
-  /// - Dzikir
-  /// - Sedekah (any amount > 0)
+  /// Check if a daily record represents a perfect day.
+  /// Delegates to [XpCalculatorService.isPerfectDay] — the single source
+  /// of truth for perfection shared with XP calculation.
   bool isPerfectDay(DailyRecord record) {
-    return record.fajrComplete &&
-        record.dhuhrComplete &&
-        record.asrComplete &&
-        record.maghribComplete &&
-        record.ishaComplete &&
-        record.puasaComplete &&
-        record.tarawihComplete &&
-        record.tilawahPages > 0 &&
-        record.dzikirComplete &&
-        record.sedekahAmount > 0;
+    return XpCalculatorService.isPerfectDay(record);
   }
 
   /// Check if all prayers are complete in a daily record
@@ -155,10 +142,13 @@ class StreakTrackerService {
     DateTime? previousDate;
 
     for (final record in sortedRecords) {
+      final recordDate =
+          DateTime(record.date.year, record.date.month, record.date.day);
+
       // Check if there's a gap in dates (more than 1 day)
       bool hasGap = false;
       if (previousDate != null) {
-        final daysDifference = record.date.difference(previousDate).inDays;
+        final daysDifference = recordDate.difference(previousDate).inDays;
         if (daysDifference > 1) {
           hasGap = true;
         }
@@ -211,7 +201,7 @@ class StreakTrackerService {
         tilawahStreak = 0;
       }
 
-      previousDate = record.date;
+      previousDate = recordDate;
     }
 
     // Update stats in database with final calculated values

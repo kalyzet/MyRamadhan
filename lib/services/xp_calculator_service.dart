@@ -99,16 +99,20 @@ class XpCalculatorService {
     }
 
     // Check for perfect day and add bonus
-    if (_isPerfectDay(record)) {
+    if (isPerfectDay(record)) {
       totalXp += calculatePerfectDayBonus();
     }
 
     return totalXp;
   }
 
-  /// Helper method to check if a day is perfect
-  /// A perfect day requires: all 5 prayers, puasa, tarawih, tilawah > 0, dzikir, sedekah > 0
-  bool _isPerfectDay(DailyRecord record) {
+  /// Single source of truth for what qualifies as a perfect day.
+  /// A perfect day requires: all 5 prayers, puasa, tarawih, tilawah > 0,
+  /// dzikir, sedekah > 0.
+  ///
+  /// Streak tracking and the AppState must use this method so the XP bonus,
+  /// streak logic, and UI can never disagree about perfection.
+  static bool isPerfectDay(DailyRecord record) {
     return record.fajrComplete &&
         record.dhuhrComplete &&
         record.asrComplete &&

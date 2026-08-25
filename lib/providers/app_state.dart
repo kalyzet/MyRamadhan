@@ -15,6 +15,7 @@ import '../services/streak_tracker_service.dart';
 import '../services/achievement_tracker_service.dart';
 import '../services/validation_service.dart';
 import '../services/localization_service.dart';
+import '../services/date_normalizer.dart';
 import '../exceptions/database_exception.dart' as app_exceptions;
 import '../exceptions/validation_exception.dart';
 
@@ -48,10 +49,12 @@ class AppState extends ChangeNotifier {
   // Cache for active session to avoid repeated database queries
   // Requirements: 9.3 - Query result caching for active session
   DateTime? _activeSessionCacheTime;
+  DateTime? _activeSessionCacheDate;
   static const Duration _cacheValidDuration = Duration(minutes: 5);
 
   // Loading and error state
   bool _isLoading = false;
+  bool _isSaving = false;
   String? _errorMessage;
 
   // Animation callbacks
@@ -65,9 +68,23 @@ class AppState extends ChangeNotifier {
   List<Achievement> get achievements => _achievements;
   List<SideQuest> get todaySideQuests => _todaySideQuests;
   bool get isLoading => _isLoading;
+
+  /// True while a record/quest mutation is being persisted. Unlike
+  /// [isLoading], this must NOT replace whole screens with skeletons —
+  /// mutations happen constantly (every checkbox toggle) and flashing the
+  /// entire UI destroys input state.
+  bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
   String get currentLanguage => _currentLanguage;
   LocalizationService get localizationService => _localizationService;
+
+  /// Whether the active session has passed its end date and should be
+  /// completed (final summary shown, then session deactivated).
+  bool get isSessionExpired {
+    final session = _activeSession;
+    if (session == null) return false;
+    return DateNormalizer.today().isAfter(session.endDate);
+  }
 
   AppState({
     SessionRepository? sessionRepository,
@@ -121,10 +138,14 @@ class AppState extends ChangeNotifier {
   /// Requirements: 1.1
   /// Implements caching to avoid repeated database queries (Requirements: 9.3)
   Future<void> loadActiveSession({bool forceRefresh = false}) async {
-    // Check if we have a valid cached session
+    // Check if we have a valid cached session.
+    // The cache is also invalidated when the calendar day changes so
+    // "today" data (record, side quests) never goes stale across midnight.
+    final today = DateNormalizer.today();
     if (!forceRefresh &&
         _activeSession != null &&
         _activeSessionCacheTime != null &&
+        _activeSessionCacheDate == today &&
         DateTime.now().difference(_activeSessionCacheTime!) <
             _cacheValidDuration) {
       // Return cached data
@@ -139,6 +160,7 @@ class AppState extends ChangeNotifier {
       // Load active session
       _activeSession = await _sessionRepository.getActiveSession();
       _activeSessionCacheTime = DateTime.now();
+      _activeSessionCacheDate = today;
 
       if (_activeSession != null) {
         // Load stats for active session
@@ -157,6 +179,12 @@ class AppState extends ChangeNotifier {
             tilawahStreak: 0,
           );
           _currentStats = await _statsRepository.updateStats(_currentStats!);
+        }
+
+        // Skip loading "today" data when the session has already ended —
+        // there are no valid days left to record or generate quests for.
+        if (isSessionExpired) {
+          return;
         }
 
         // Load today's record
@@ -233,11 +261,10 @@ class AppState extends ChangeNotifier {
         currentDayNumber: currentDayNumber,
       );
 
-      // Deactivate all other sessions and activate this one
-      await _sessionRepository.deactivateAllSessions();
-      await _sessionRepository.setActiveSession(session.id!);
-
-      // Initialize stats for the new session
+      // Initialize stats and achievements BEFORE activating, so an active
+      // session always has its supporting data. (setActiveSession atomically
+      // deactivates all other sessions in a transaction — no separate
+      // deactivate pass is needed.)
       final initialStats = UserStats(
         sessionId: session.id!,
         totalXp: 0,
@@ -251,6 +278,9 @@ class AppState extends ChangeNotifier {
 
       // Initialize achievements for the new session
       await _achievementRepository.initializeAchievements(session.id!);
+
+      // Activate this session
+      await _sessionRepository.setActiveSession(session.id!);
 
       // Reload active session data
       await loadActiveSession(forceRefresh: true);
@@ -287,7 +317,9 @@ class AppState extends ChangeNotifier {
       rethrow;
     }
 
-    _isLoading = true;
+    // Persist silently: toggling _isLoading here would flash a full-screen
+    // skeleton over the checklist on every checkbox toggle (M4).
+    _isSaving = true;
     _errorMessage = null;
     notifyListeners();
 
@@ -295,14 +327,25 @@ class AppState extends ChangeNotifier {
       // Store old level for level-up detection
       final oldLevel = _currentStats?.level ?? 1;
 
+      // Fetch the existing record (if any) so XP is applied as a delta —
+      // re-saving the same day must not award the full day's XP again.
+      final existingRecord = await _dailyRecordRepository.getRecordByDate(
+        _activeSession!.id!,
+        record.date,
+      );
+
       // Calculate XP for the record
       final xpEarned = _xpCalculatorService.calculateTotalDailyXp(record);
+      final previousXp = existingRecord?.xpEarned ?? 0;
+      final xpDelta = xpEarned - previousXp;
 
       // Check if it's a perfect day
       final isPerfectDay = _isPerfectDay(record);
 
-      // Update record with calculated values
+      // Update record with calculated values, keeping any existing id so the
+      // save updates the existing row instead of duplicating it
       final updatedRecord = record.copyWith(
+        id: record.id ?? existingRecord?.id,
         xpEarned: xpEarned,
         isPerfectDay: isPerfectDay,
       );
@@ -311,30 +354,27 @@ class AppState extends ChangeNotifier {
       final savedRecord =
           await _dailyRecordRepository.createOrUpdateRecord(updatedRecord);
 
-      // Get previous day's record for streak calculation
-      final previousDay = record.date.subtract(const Duration(days: 1));
-      final previousDayRecord = await _dailyRecordRepository.getRecordByDate(
+      // Recalculate streaks from the full record history so repeated saves
+      // and backfilled records cannot corrupt the streak counters.
+      final allRecords = await _dailyRecordRepository
+          .getRecordsForSession(_activeSession!.id!);
+      await _streakTrackerService.recalculateAllStreaks(
         _activeSession!.id!,
-        previousDay,
+        allRecords,
       );
 
-      // Update streaks
-      await _streakTrackerService.updateStreaksForNewRecord(
-        _activeSession!.id!,
-        savedRecord,
-        previousDayRecord,
-      );
-
-      // Add XP to stats
-      await _statsRepository.addXp(_activeSession!.id!, xpEarned);
+      // Apply only the XP delta to stats
+      if (xpDelta != 0) {
+        await _statsRepository.addXp(_activeSession!.id!, xpDelta);
+      }
 
       // Reload stats
       _currentStats =
           await _statsRepository.getStatsForSession(_activeSession!.id!);
 
       // Trigger XP gain animation if XP was earned
-      if (xpEarned > 0) {
-        onXpGained?.call(xpEarned);
+      if (xpDelta > 0) {
+        onXpGained?.call(xpDelta);
       }
 
       // Check for level up and trigger animation
@@ -344,12 +384,11 @@ class AppState extends ChangeNotifier {
       }
 
       // Check and unlock achievements
-      final allRecords = await _dailyRecordRepository
-          .getRecordsForSession(_activeSession!.id!);
       await _achievementTrackerService.checkAndUnlockAchievements(
         _activeSession!.id!,
         _currentStats!,
         allRecords,
+        totalDays: _activeSession!.totalDays,
       );
 
       // Reload achievements
@@ -375,7 +414,7 @@ class AppState extends ChangeNotifier {
       _errorMessage = 'Failed to update record. Please try again.';
       rethrow;
     } finally {
-      _isLoading = false;
+      _isSaving = false;
       notifyListeners();
     }
   }
@@ -388,7 +427,8 @@ class AppState extends ChangeNotifier {
       throw StateError('No active session');
     }
 
-    _isLoading = true;
+    // Persist silently — see isSaving doc (M4)
+    _isSaving = true;
     _errorMessage = null;
     notifyListeners();
 
@@ -399,8 +439,12 @@ class AppState extends ChangeNotifier {
         orElse: () => throw ArgumentError('Quest not found'),
       );
 
-      // Mark quest as completed
-      await _sideQuestRepository.completeSideQuest(questId);
+      // Mark quest as completed. Only award XP if this call actually
+      // transitioned the quest to completed (guards double-tap XP farming).
+      final wasCompleted = await _sideQuestRepository.completeSideQuest(questId);
+      if (!wasCompleted) {
+        return;
+      }
 
       // Award XP
       await _statsRepository.addXp(_activeSession!.id!, quest.xpReward);
@@ -422,6 +466,33 @@ class AppState extends ChangeNotifier {
       _errorMessage = 'Failed to complete quest. Please try again.';
       rethrow;
     } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  /// Complete the active session after it has ended.
+  /// Deactivates the session, invalidates the cache, and reloads state
+  /// so the UI returns to the "create session" flow.
+  Future<void> completeActiveSession() async {
+    final session = _activeSession;
+    if (session == null || session.id == null) return;
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _sessionRepository.completeSession(session.id!);
+      invalidateCache();
+      await loadActiveSession(forceRefresh: true);
+    } on app_exceptions.DatabaseException catch (e) {
+      _errorMessage = e.userMessage;
+      rethrow;
+    } catch (e) {
+      _errorMessage = 'Failed to complete session. Please try again.';
+      rethrow;
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
@@ -438,21 +509,13 @@ class AppState extends ChangeNotifier {
   /// Requirements: 9.3
   void invalidateCache() {
     _activeSessionCacheTime = null;
+    _activeSessionCacheDate = null;
   }
 
   /// Helper method to check if a day is perfect
-  /// A perfect day requires: all 5 prayers, puasa, tarawih, tilawah > 0, dzikir, sedekah > 0
+  /// Delegates to the shared definition in XpCalculatorService
   bool _isPerfectDay(DailyRecord record) {
-    return record.fajrComplete &&
-        record.dhuhrComplete &&
-        record.asrComplete &&
-        record.maghribComplete &&
-        record.ishaComplete &&
-        record.puasaComplete &&
-        record.tarawihComplete &&
-        record.tilawahPages > 0 &&
-        record.dzikirComplete &&
-        record.sedekahAmount > 0;
+    return XpCalculatorService.isPerfectDay(record);
   }
 
   /// Change the application language

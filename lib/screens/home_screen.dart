@@ -7,6 +7,7 @@ import '../widgets/xp_gain_animation.dart';
 import '../widgets/error_display.dart';
 import '../widgets/skeleton_loader.dart';
 import '../widgets/real_time_clock_widget.dart';
+import '../services/date_normalizer.dart';
 
 /// Home screen displaying daily checklist and progress
 /// Requirements: 10.3, 11.1
@@ -21,19 +22,32 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   OverlayEntry? _xpOverlay;
   OverlayEntry? _levelUpOverlay;
+  AppState? _appState;
+
+  // Owned by this State (not rebuilt inside build) so typing survives
+  // Consumer rebuilds triggered by record saves.
+  late final TextEditingController _tilawahController;
+  late final TextEditingController _sedekahController;
+  final FocusNode _tilawahFocus = FocusNode();
+  final FocusNode _sedekahFocus = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    
+
+    _tilawahController = TextEditingController(text: '0');
+    _sedekahController = TextEditingController(text: '0');
+
     // Set up animation callbacks after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final appState = Provider.of<AppState>(context, listen: false);
-      
+      _appState = appState;
+
       appState.onXpGained = (xpAmount) {
         _showXpGainAnimation(xpAmount);
       };
-      
+
       appState.onLevelUp = (newLevel) {
         _showLevelUpAnimation(newLevel);
       };
@@ -42,6 +56,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    // Detach callbacks so a pending save finishing after this screen is
+    // disposed cannot insert overlays into a defunct context.
+    _appState?.onXpGained = null;
+    _appState?.onLevelUp = null;
+    _appState = null;
+
+    _tilawahController.dispose();
+    _sedekahController.dispose();
+    _tilawahFocus.dispose();
+    _sedekahFocus.dispose();
+
     _xpOverlay?.remove();
     _levelUpOverlay?.remove();
     super.dispose();
@@ -180,8 +205,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final sideQuests = appState.todaySideQuests;
 
         // Calculate current Ramadhan day
-        final today = DateTime.now();
-        final daysSinceStart = today.difference(session.startDate).inDays + 1;
+        final daysSinceStart =
+            DateNormalizer.daysBetween(session.startDate, DateTime.now()) + 1;
         final currentDay = daysSinceStart.clamp(1, session.totalDays);
 
         return SingleChildScrollView(
@@ -217,7 +242,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-}
 
   Widget _buildDayIndicator(BuildContext context, int currentDay, int totalDays) {
     final appState = Provider.of<AppState>(context, listen: false);
@@ -556,9 +580,13 @@ class _HomeScreenState extends State<HomeScreen> {
     DailyRecord? todayRecord,
   ) {
     final t = appState.localizationService.translate;
-    final controller = TextEditingController(
-      text: todayRecord?.tilawahPages.toString() ?? '0',
-    );
+
+    // Sync from the record only when the user is not typing in the field,
+    // so saves triggered elsewhere never clobber in-progress input.
+    final expectedPages = (todayRecord?.tilawahPages ?? 0).toString();
+    if (!_tilawahFocus.hasFocus && _tilawahController.text != expectedPages) {
+      _tilawahController.text = expectedPages;
+    }
 
     return Row(
       children: [
@@ -580,7 +608,8 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           width: 80,
           child: TextField(
-            controller: controller,
+            controller: _tilawahController,
+            focusNode: _tilawahFocus,
             keyboardType: TextInputType.number,
             style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
@@ -619,9 +648,12 @@ class _HomeScreenState extends State<HomeScreen> {
     DailyRecord? todayRecord,
   ) {
     final t = appState.localizationService.translate;
-    final controller = TextEditingController(
-      text: todayRecord?.sedekahAmount.toString() ?? '0',
-    );
+
+    // Sync from the record only when the user is not typing in the field.
+    final expectedAmount = (todayRecord?.sedekahAmount ?? 0).toString();
+    if (!_sedekahFocus.hasFocus && _sedekahController.text != expectedAmount) {
+      _sedekahController.text = expectedAmount;
+    }
 
     return Row(
       children: [
@@ -643,7 +675,8 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           width: 100,
           child: TextField(
-            controller: controller,
+            controller: _sedekahController,
+            focusNode: _sedekahFocus,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
@@ -1041,6 +1074,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+}
 
 /// Animated checkbox tile with smooth transitions
 /// Requirements: 11.2 (60 FPS animations)

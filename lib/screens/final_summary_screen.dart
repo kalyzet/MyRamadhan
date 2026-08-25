@@ -6,6 +6,7 @@ import '../models/daily_record.dart';
 import '../repositories/daily_record_repository.dart';
 import '../repositories/stats_repository.dart';
 import '../repositories/achievement_repository.dart';
+import '../services/date_normalizer.dart';
 
 /// Final summary screen displayed on day 30 or Eid
 /// Shows complete Ramadhan journey statistics and achievements
@@ -13,22 +14,27 @@ import '../repositories/achievement_repository.dart';
 class FinalSummaryScreen extends StatelessWidget {
   final RamadhanSession session;
 
+  /// Called when the user finishes/closes the summary. Typically used to
+  /// deactivate the expired session before popping.
+  final Future<void> Function()? onFinish;
+
   const FinalSummaryScreen({
     super.key,
     required this.session,
+    this.onFinish,
   });
 
   /// Check if the final summary should be displayed
   /// Triggers on day 30 or when Ramadhan is complete
   /// Requirements: 8.1
   static bool shouldDisplay(RamadhanSession session) {
-    final today = DateTime.now();
-    final daysSinceStart = today.difference(session.startDate).inDays + 1;
-    
-    // Display if we're on day 30 or beyond, or if we've reached the end date
-    return daysSinceStart >= session.totalDays || 
-           today.isAfter(session.endDate) ||
-           today.isAtSameMomentAs(session.endDate);
+    final today = DateNormalizer.today();
+    final daysSinceStart =
+        DateNormalizer.daysBetween(session.startDate, today) + 1;
+
+    // Display if we're on the final day or beyond, or if we've reached the end date
+    return daysSinceStart >= session.totalDays ||
+           today.isAfter(session.endDate);
   }
 
   @override
@@ -119,7 +125,14 @@ class FinalSummaryScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () async {
+              if (onFinish != null) {
+                await onFinish!();
+              }
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
             icon: const Icon(Icons.close),
             label: const Text('Close'),
             style: ElevatedButton.styleFrom(

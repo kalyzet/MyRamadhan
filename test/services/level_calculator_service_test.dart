@@ -15,37 +15,39 @@ void main() {
     });
 
     test('calculateLevel returns 1 for XP below level 2 threshold', () {
-      // Level 2 requires 2*2*100 = 400 XP
-      expect(service.calculateLevel(100), 1);
-      expect(service.calculateLevel(399), 1);
+      // Cost of level 1 -> 2 is 1*1*100 = 100 XP
+      expect(service.calculateLevel(50), 1);
+      expect(service.calculateLevel(99), 1);
     });
 
     test('calculateLevel returns 2 when reaching level 2 threshold', () {
-      // Level 2 requires 400 XP
-      expect(service.calculateLevel(400), 2);
-      expect(service.calculateLevel(500), 2);
+      expect(service.calculateLevel(100), 2);
+      // Cumulative to reach level 3 is 100 + 400 = 500
+      expect(service.calculateLevel(499), 2);
     });
 
     test('calculateLevel returns correct level for higher XP', () {
-      // Level 3 requires 3*3*100 = 900 XP
-      expect(service.calculateLevel(900), 3);
-      // Level 4 requires 4*4*100 = 1600 XP
-      expect(service.calculateLevel(1600), 4);
-      // Level 5 requires 5*5*100 = 2500 XP
-      expect(service.calculateLevel(2500), 5);
+      // Cumulative: L3 = 500, L4 = 1400, L5 = 3000
+      expect(service.calculateLevel(500), 3);
+      expect(service.calculateLevel(1399), 3);
+      expect(service.calculateLevel(1400), 4);
+      expect(service.calculateLevel(2999), 4);
+      expect(service.calculateLevel(3000), 5);
     });
 
     test('calculateLevel throws for negative XP', () {
       expect(() => service.calculateLevel(-1), throwsArgumentError);
     });
 
-    test('calculateRequiredXpForLevel returns correct values', () {
-      expect(service.calculateRequiredXpForLevel(1), 100);
-      expect(service.calculateRequiredXpForLevel(2), 400);
-      expect(service.calculateRequiredXpForLevel(3), 900);
-      expect(service.calculateRequiredXpForLevel(4), 1600);
-      expect(service.calculateRequiredXpForLevel(5), 2500);
-      expect(service.calculateRequiredXpForLevel(10), 10000);
+    test('calculateRequiredXpForLevel returns cumulative values', () {
+      // C(L) = sum(i² × 100) for i = 1..L-1
+      expect(service.calculateRequiredXpForLevel(1), 0);
+      expect(service.calculateRequiredXpForLevel(2), 100);
+      expect(service.calculateRequiredXpForLevel(3), 500);
+      expect(service.calculateRequiredXpForLevel(4), 1400);
+      expect(service.calculateRequiredXpForLevel(5), 3000);
+      // sum i=1..9 of i² = 285 → 28500
+      expect(service.calculateRequiredXpForLevel(10), 28500);
     });
 
     test('calculateRequiredXpForLevel throws for level < 1', () {
@@ -54,20 +56,18 @@ void main() {
     });
 
     test('calculateProgressToNextLevel returns 0.0 at level start', () {
-      // At level 1 with 100 XP (exactly at level 1 threshold)
-      expect(service.calculateProgressToNextLevel(100, 1), 0.0);
+      // Level 1 starts at 0 XP
+      expect(service.calculateProgressToNextLevel(0, 1), 0.0);
     });
 
     test('calculateProgressToNextLevel returns correct progress mid-level', () {
-      // Level 1 requires 100 XP, Level 2 requires 400 XP
-      // Range is 300 XP (400 - 100)
-      // At 250 XP: progress = (250 - 100) / 300 = 150 / 300 = 0.5
-      expect(service.calculateProgressToNextLevel(250, 1), closeTo(0.5, 0.01));
+      // Level 1 spans 0..100 XP; at 50 XP progress = 0.5
+      expect(service.calculateProgressToNextLevel(50, 1), closeTo(0.5, 0.01));
     });
 
     test('calculateProgressToNextLevel returns 1.0 at next level threshold', () {
-      // At 400 XP (level 2 threshold) while still at level 1
-      expect(service.calculateProgressToNextLevel(400, 1), 1.0);
+      // At 100 XP the user has fully paid level 1's cost
+      expect(service.calculateProgressToNextLevel(100, 1), 1.0);
     });
 
     test('calculateProgressToNextLevel throws for negative XP', () {
@@ -114,19 +114,23 @@ void main() {
       }
     });
 
-    // **Feature: my-ramadhan-app, Property 12: Required XP formula correctness**
+    // **Feature: my-ramadhan-app, Property 12: Cumulative required XP correctness**
     // **Validates: Requirements 3.3**
-    Glados<int>().test('Property 12: Required XP equals level × level × 100',
+    Glados<int>().test(
+        'Property 12: Required XP equals sum of i² × 100 below the level',
         (level) {
       // Generate valid level values (1 to 100)
       final validLevel = (level.abs() % 100) + 1;
 
       final requiredXp = service.calculateRequiredXpForLevel(validLevel);
-      final expectedXp = validLevel * validLevel * 100;
+      var expectedXp = 0;
+      for (var i = 1; i < validLevel; i++) {
+        expectedXp += i * i * 100;
+      }
 
       expect(requiredXp, expectedXp,
           reason:
-              'Required XP for level $validLevel should be $expectedXp but got $requiredXp');
+              'Cumulative XP for level $validLevel should be $expectedXp but got $requiredXp');
     });
   });
 }
